@@ -1,0 +1,7 @@
+<component name="ProjectRunConfigurationManager">
+  <configuration default="false" name="Gradle Remapper" type="CompoundRunConfigurationType">
+    <toRun name="Gradle Remapper 1.18.1" type="GradleRunConfiguration" />
+    <toRun name="Gradle Remapper 1.18.2" type="GradleRunConfiguration" />
+    <method v="2" />
+  </configuration>
+</component>
