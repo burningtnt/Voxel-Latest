@@ -1,0 +1,22 @@
+{
+  "required": true,
+  "minVersion": "0.7.7",
+  "compatibilityLevel": "JAVA_16",
+  "package": "com.mamiyaotaru.voxelmap.fabricmod.mixins",
+  "refmap": "mixin.voxelmap.refmap.json",
+  "target": "@env(DEFAULT)",
+  "client": [
+    "APIMixinChatListenerHud",
+    "APIMixinClientPlayerEntity",
+    "APIMixinInGameHud",
+    "APIMixinMinecraftClient",
+    "APIMixinNetHandlerPlayClient",
+    "APIMixinReloadableResourceManagerImpl",
+    "MixinWorldRenderer",
+    "ONMixinBackgroundRenderer",
+    "ONMixinWorldRenderer"
+  ],
+  "injectors": {
+    "defaultRequire": 1
+  }
+}
