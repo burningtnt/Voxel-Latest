@@ -1,7 +1,7 @@
 Voxel Latest: A mod to make Voxelmap could work accurately in latest versions.
 =================
 
-**Language**: [zh-CN](https://github.com/burningtnt/Voxel-Latest/master/README_zh-CN.md) **en-EN**
+**Language**: [zh-CN](https://github.com/burningtnt/Voxel-Latest/blob/master/README_zh-CN.md) **en-EN**
 
 ### Introduction
 **Voxel Latest** is a mod to make Voxelmap could work accurately in latest versions.

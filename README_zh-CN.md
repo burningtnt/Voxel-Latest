@@ -1,7 +1,7 @@
 Voxel Latest: 一个可以让 VoxelMap 在高版本可以运行的模组。
 =================
 
-**语言**: [zh-CN](https://github.com/burningtnt/Voxel-Latest/master/README_zh-CN.md) **en-EN**
+**语言**: **zh-CN** [en-EN](https://github.com/burningtnt/Voxel-Latest)
 
 ### 简介
 **Voxel Latest** 是一个可以让 VoxelMap 在高版本可以运行的模组。
