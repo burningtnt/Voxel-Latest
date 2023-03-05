@@ -1,20 +1,15 @@
-package net.burningtnt.voxellatest.managers;
+package net.burningtnt.voxellatest.util;
 
 import com.google.gson.*;
-import net.burningtnt.voxellatest.util.LoggerManagerUtil;
-import net.burningtnt.voxellatest.util.ModInfoUtil;
-import net.burningtnt.voxellatest.util.VoxelMapClassRemapUtil;
 import net.fabricmc.loader.api.FabricLoader;
 import org.jetbrains.annotations.NotNull;
 
 import javax.annotation.Nullable;
 import java.io.*;
 import java.nio.charset.StandardCharsets;
-import java.nio.file.Path;
-import java.util.List;
 import java.util.Objects;
 
-public class RemapConfigManager {
+public class ConfigFileManager {
     private static class Keys {
         public static final String CONFIG_FILE_VERSION = "configFileVersion";
         public static final String VOXEL_LATEST_VERSION = "voxelLatestVersion";
@@ -77,13 +72,13 @@ public class RemapConfigManager {
 
         public JsonElement toJsonElement() {
             if (this.voxelLatestVersion == null) {
-                throw new NullPointerException("net.burningtnt.voxellatest.config.ConfigFileManager.Config.voxelLatestVersion is null.");
+                throw new NullPointerException("net.burningtnt.voxellatest.util.ConfigFileManager.Config.voxelLatestVersion is null.");
             }
             if (this.voxelRemapperVersion == null) {
-                throw new NullPointerException("net.burningtnt.voxellatest.config.ConfigFileManager.Config.voxelRemapperVersion is null.");
+                throw new NullPointerException("net.burningtnt.voxellatest.util.ConfigFileManager.Config.voxelRemapperVersion is null.");
             }
             if (this.minecraftVersion == null) {
-                throw new NullPointerException("net.burningtnt.voxellatest.config.ConfigFileManager.Config.minecraftVersion is null.");
+                throw new NullPointerException("net.burningtnt.voxellatest.util.ConfigFileManager.Config.minecraftVersion is null.");
             }
 
             JsonObject root = new JsonObject();
@@ -94,7 +89,7 @@ public class RemapConfigManager {
             return root;
         }
 
-        private static class ConfigFactory {
+        public static class ConfigFactory {
             private int configFileVersion = -1;
             @Nullable
             private String voxelLatestVersion = null;
@@ -167,81 +162,11 @@ public class RemapConfigManager {
         }
     }
 
-    private static boolean isVoxellatestRemapperDeveloping() {
-        if ("ignoreDeveloping".equals(System.getProperty("voxellatest.cache"))) {
-            return false;
-        }
-        List<Path> pathList = FabricLoader.getInstance().getModContainer("voxellatest-remapper").get().getRootPaths();
-        try {
-            return pathList.get(0).toFile().isDirectory();
-        } catch (Throwable e) {
-            return false;
-        }
+    public static Config of(File configFile) {
+        return parseConfigFile(configFile);
     }
 
-    public static boolean shouldRemapVoxelMap() {
-        if ("never".equals(System.getProperty("voxellatest.cache"))) {
-            return true;
-        }
-
-        File configFile = ConfigFileManager.RemapConfigFileManager.getRemapVersionConfigFile();
-        if (!configFile.exists()) {
-            LoggerManagerUtil.info("ConfigFile don't exists");
-            return true;
-        }
-        if (!configFile.isFile()) {
-            LoggerManagerUtil.info("ConfigFile is not a File");
-            return true;
-        }
-
-        if (isVoxellatestRemapperDeveloping()) {
-            LoggerManagerUtil.info("Mod voxellatest-remapper is developing. Force update");
-            return true;
-        }
-
-        File remappedJarFile = ConfigFileManager.RemapConfigFileManager.getRemapedFile();
-        if (!remappedJarFile.exists()) {
-            return true;
-        }
-        if (!remappedJarFile.isFile()) {
-            return true;
-        }
-
-        File voxelMapJarFile = ConfigFileManager.RemapConfigFileManager.getRemapedFile();
-        if (!voxelMapJarFile.exists()) {
-            return true;
-        }
-        if (!voxelMapJarFile.isFile()) {
-            return true;
-        }
-
-        return !RemapConfigManager.parseConfigFile(configFile).isLatest();
-    }
-
-    public static void writeCurrentConfig() {
-        if (isVoxellatestRemapperDeveloping()) {
-            return;
-        }
-
-//        File hashFile = new File(voxellatestFolder, "hash");
-//        try (FileOutputStream fileOutputStream = new FileOutputStream(hashFile)) {
-////            long sizeData = voxelMapJarFile.length();
-////            fileOutputStream.write((byte) (sizeData >>> 24 & 0xFF));
-////            fileOutputStream.write((byte) (sizeData >>> 16 & 0xFF));
-////            fileOutputStream.write((byte) (sizeData >>> 8 & 0xFF));
-////            fileOutputStream.write((byte) (sizeData & 0xFF));
-//            fileOutputStream.write(String.valueOf(voxelMapJarFile.length()).getBytes());
-//        } catch (IOException e) {
-//            throw new RuntimeException(String.format("An Error was thron while writing data to \"%s\".", hashFile.getAbsolutePath()), e);
-//        }
-
-        File configFile = ConfigFileManager.RemapConfigFileManager.getRemapVersionConfigFile();
-
-        RemapConfigManager.writeTo(configFile);
-    }
-
-
-    private static void writeTo(File configFile) {
+    public static void writeTo(File configFile) {
         if (configFile.exists() && (!configFile.isFile() || !configFile.canWrite())) {
             throw new SecurityException(String.format("Failed to write to file \"%s\".", configFile.getAbsolutePath()));
         }
@@ -251,7 +176,7 @@ public class RemapConfigManager {
         try (FileOutputStream fileOutputStream = new FileOutputStream(configFile)) {
             fileOutputStream.write(data);
         } catch (IOException e) {
-            throw new RuntimeException(String.format("An Error was thrown while writing data to \"%s\".", configFile.getAbsolutePath()), e);
+            throw new RuntimeException(String.format("An Error was thrown while writing data to \"%s\".", configFile.getAbsolutePath()),e);
         }
     }
 
@@ -266,7 +191,7 @@ public class RemapConfigManager {
         try (FileInputStream fileInputStream = new FileInputStream(configFile)) {
             data = fileInputStream.readAllBytes();
         } catch (IOException e) {
-            throw new RuntimeException(String.format("An Error was thrown while reading data from \"%s\".", configFile), e);
+            throw new RuntimeException(String.format("An Error was thrown while reading data from \"%s\".", configFile),e);
         }
 
         JsonElement configJsonRoot;

@@ -1,8 +1,6 @@
 package net.burningtnt.voxellatest.util;
 
 import com.google.gson.*;
-import net.burningtnt.voxellatest.managers.ConfigFileManager;
-import net.burningtnt.voxellatest.managers.RemapConfigManager;
 import net.burningtnt.voxellatest.mappers.ASMRemapManager;
 import net.fabricmc.loader.api.FabricLoader;
 import net.fabricmc.loader.impl.FabricLoaderImpl;
@@ -16,8 +14,10 @@ import java.lang.reflect.Field;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
+import java.nio.file.NoSuchFileException;
 import java.nio.file.Path;
 import java.util.Enumeration;
+import java.util.List;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
 import java.util.zip.ZipInputStream;
@@ -99,7 +99,7 @@ public class VoxelMapClassRemapUtil {
     private static void downloadVoxelMapJarFile() {
         FabricLoader fabricLoader = FabricLoader.getInstance();
 
-        voxelMapJarFile = ConfigFileManager.RemapConfigFileManager.getResourceFile();
+        voxelMapJarFile = new File(fabricLoader.getGameDir().toFile(), "voxellatest/resource.jar");
 
         String url = "https://mediafilez.forgecdn.net/files/3345/206/fabricmod_VoxelMap-1.10.15_for_1.17.0.jar";
 
@@ -125,41 +125,114 @@ public class VoxelMapClassRemapUtil {
         return l[l.length - 1];
     }
 
-    private static void mapVoxelMapJarFile() {
+    private static boolean shouldUpdateVoxelMapJarFileMapCache() {
+        if ("never".equals(System.getProperty("voxellatest.cache"))) {
+            return true;
+        }
+
         FabricLoader fabricLoader = FabricLoader.getInstance();
 
-        if (!RemapConfigManager.shouldRemapVoxelMap()) {
+        File voxellatestFolder = new File(fabricLoader.getGameDir().toFile(), "voxellatest");
+        if (!voxellatestFolder.exists()) {
+            return true;
+        }
+        if (voxellatestFolder.isFile()) {
+            LoggerManagerUtil.info("VoxelLatestFolder is a file.");
+            return true;
+        }
+
+        File configFile = new File(voxellatestFolder, "version-config.json");
+        if (!configFile.exists()) {
+            LoggerManagerUtil.info("ConfigFile don't exists");
+            return true;
+        }
+        if (!configFile.isFile()) {
+            LoggerManagerUtil.info("ConfigFile is not a File");
+            return true;
+        }
+
+        if (isVoxellatestRemapperDeveloping()) {
+            LoggerManagerUtil.info("Mod voxellatest-remapper is developing. Force update");
+            return true;
+        }
+
+        remappedJarFile = new File(voxellatestFolder, "remapped.jar");
+        if (!remappedJarFile.exists()) {
+            return true;
+        }
+        if (!remappedJarFile.isFile()) {
+            return true;
+        }
+
+        voxelMapJarFile = new File(voxellatestFolder, "resource.jar");
+        if (!voxelMapJarFile.exists()) {
+            return true;
+        }
+        if (!voxelMapJarFile.isFile()) {
+            return true;
+        }
+
+//        long voxelMapJarFileSize;
+//        try (FileInputStream fileInputStream = new FileInputStream(configFile)) {
+//            byte[] data = fileInputStream.readAllBytes();
+////            voxelMapJarFileSize = (((long) data[0] & 0xFFFF_0000_0000_0000L) << 24) | (((long) data[1] & 0x0000_FFFF_0000_0000L) << 16) | (((long) data[2] & 0x0000_0000_FFFF_0000L) << 8) | ((long) data[3] & 0x0000_0000_0000_FFFFL);
+//            voxelMapJarFileSize = Long.parseLong(new String(data));
+//        } catch (IOException e) {
+//            LoggerManagerUtil.fail(String.format("An Error was thrown while reading the data from \"%s\"", configFile.getAbsolutePath()), e);
+//            return true;
+//        }
+//
+//        return voxelMapJarFile.length() != voxelMapJarFileSize;
+
+        return !ConfigFileManager.of(configFile).isLatest();
+    }
+
+    private static void mapVoxelMapJarFile() {
+//        VoxelMapClassRemapUtil.findVoxelMapJarFile();
+        FabricLoader fabricLoader = FabricLoader.getInstance();
+
+        if (!shouldUpdateVoxelMapJarFileMapCache()) {
             LoggerManagerUtil.info("Find remapped.jar. Skip Remapping");
             return;
         }
 
         LoggerManagerUtil.info("Remapping voxelmap.jar. This may cost a huge amount of time. Please wait patiently");
 
+        File voxellatestFolder = new File(fabricLoader.getGameDir().toFile(), "voxellatest");
+        if (voxellatestFolder.exists()) {
+            deleteFile(voxellatestFolder);
+        }
+
+        if (!voxellatestFolder.mkdir()) {
+            throw new SecurityException(String.format("Cannot make directory at \"%s\".", voxellatestFolder.getAbsolutePath()));
+        }
+
         downloadVoxelMapJarFile();
 
-        ModInfoUtil.getMinecraftVersion();
+        getMinecraftVersion();
         getMappingVersion();
         getMinecraftFile();
 
-        remappedJarFile = ConfigFileManager.RemapConfigFileManager.getRemapedFile();
+        remappedJarFile = new File(voxellatestFolder, "remapped.jar");
 
         // Remapping...
-        LoggerManagerUtil.info(String.format("Remapping: %s %s -> %s %s", ModInfoUtil.getMinecraftVersion(), NamespaceUtil.MAPPING_INTERMEDIARY, ModInfoUtil.getMinecraftVersion(), NamespaceUtil.MAPPING_YARN));
-        invokeRemapper(NamespaceUtil.MAPPING_INTERMEDIARY, NamespaceUtil.MAPPING_YARN, voxelMapJarFile, remappedJarFile);
+        LoggerManagerUtil.info(String.format("Remapping: %s %s -> %s %s", getMinecraftVersion(), NamespaceUtil.MAPPING_INTERMEDIARY, getMinecraftVersion(), NamespaceUtil.MAPPING_YARN));
+        File remapFileDynamic = getRemapFile();
+        invokeRemapper(remapFileDynamic, NamespaceUtil.MAPPING_INTERMEDIARY, NamespaceUtil.MAPPING_YARN, voxelMapJarFile, remappedJarFile);
 
-        LoggerManagerUtil.info(String.format("Remapping: %s %s -> %s %s", ModInfoUtil.getMinecraftVersion(), NamespaceUtil.MAPPING_YARN, ModInfoUtil.getMinecraftVersion(), NamespaceUtil.MAPPING_YARN));
+        LoggerManagerUtil.info(String.format("Remapping: %s %s -> %s %s", getMinecraftVersion(), NamespaceUtil.MAPPING_YARN, getMinecraftVersion(), NamespaceUtil.MAPPING_YARN));
         prepareRemapByASM();
         remapByASM();
 
         if (FabricLoader.getInstance().isDevelopmentEnvironment()) {
-            LoggerManagerUtil.info(String.format("Remapping: Minecraft %s developing environment detected.", ModInfoUtil.getMinecraftVersion()));
+            LoggerManagerUtil.info(String.format("Remapping: Minecraft %s developing environment detected.", getMinecraftVersion()));
         } else {
-            LoggerManagerUtil.info(String.format("Remapping: %s %s -> %s %s", ModInfoUtil.getMinecraftVersion(), NamespaceUtil.MAPPING_YARN, ModInfoUtil.getMinecraftVersion(), NamespaceUtil.MAPPING_INTERMEDIARY));
+            LoggerManagerUtil.info(String.format("Remapping: %s %s -> %s %s", getMinecraftVersion(), NamespaceUtil.MAPPING_YARN, getMinecraftVersion(), NamespaceUtil.MAPPING_INTERMEDIARY));
 
             String nextStepFileName = remappedJarFile.getAbsolutePath();
             nextStepFileName = nextStepFileName.substring(0, nextStepFileName.length() - getFileType(nextStepFileName).length() - 1) + "_INTERMEDIARY.jar";
             File nextStepFile = new File(nextStepFileName);
-            invokeRemapper(NamespaceUtil.MAPPING_YARN, NamespaceUtil.MAPPING_INTERMEDIARY, remappedJarFile, nextStepFile);
+            invokeRemapper(remapFileDynamic, NamespaceUtil.MAPPING_YARN, NamespaceUtil.MAPPING_INTERMEDIARY, remappedJarFile, nextStepFile);
             if (!remappedJarFile.delete()) {
                 throw new SecurityException(String.format("Failed to delete file \"%s\"", remappedJarFile.getAbsolutePath()));
             }
@@ -170,45 +243,80 @@ public class VoxelMapClassRemapUtil {
 
         LoggerManagerUtil.info("Remapping: Finish");
 
-        RemapConfigManager.writeCurrentConfig();
+        createConfigFile();
     }
 
+    private static boolean isVoxellatestRemapperDeveloping() {
+        if ("ignoreDeveloping".equals(System.getProperty("voxellatest.cache"))) {
+            return false;
+        }
+        List<Path> pathList = FabricLoader.getInstance().getModContainer("voxellatest-remapper").get().getRootPaths();
+        try {
+            return pathList.get(0).toFile().isDirectory();
+        } catch (Throwable e) {
+            return false;
+        }
+    }
+
+
+    private static void createConfigFile() {
+        if (isVoxellatestRemapperDeveloping()) {
+            return;
+        }
+
+        File voxellatestFolder = new File(FabricLoader.getInstance().getGameDir().toFile(), "voxellatest");
+//        File hashFile = new File(voxellatestFolder, "hash");
+//        try (FileOutputStream fileOutputStream = new FileOutputStream(hashFile)) {
+////            long sizeData = voxelMapJarFile.length();
+////            fileOutputStream.write((byte) (sizeData >>> 24 & 0xFF));
+////            fileOutputStream.write((byte) (sizeData >>> 16 & 0xFF));
+////            fileOutputStream.write((byte) (sizeData >>> 8 & 0xFF));
+////            fileOutputStream.write((byte) (sizeData & 0xFF));
+//            fileOutputStream.write(String.valueOf(voxelMapJarFile.length()).getBytes());
+//        } catch (IOException e) {
+//            throw new RuntimeException(String.format("An Error was thron while writing data to \"%s\".", hashFile.getAbsolutePath()), e);
+//        }
+
+        File configFile = new File(voxellatestFolder, "version-config.json");
+
+        ConfigFileManager.writeTo(configFile);
+    }
 
     private static void getMinecraftFile() {
 
         LoggerManagerUtil.info("Getting minecraftintermediary file");
-//        LoggerManagerUtil.warn("Starting using sun.misc.Unsafe package. JVM may crash");
+        LoggerManagerUtil.warn("Starting using sun.misc.Unsafe package. JVM may crash");
 
-        File currentMinecraftFile = FabricLoaderImpl.INSTANCE.getModContainer("minecraft").get().getRoot().toFile();
-//        try {
-//            // Get Unsafe instance
-//            Unsafe theUnsafe = null;
-//            Field theUnsafeField = Unsafe.class.getDeclaredField("theUnsafe");
-//            theUnsafeField.setAccessible(true);
-//            theUnsafe = (Unsafe) theUnsafeField.get(null);
-//
-//            // Get zipFileSystemInstance.zfpath
-//            Object zipFileSystemInstance = FabricLoaderImpl.INSTANCE.getModContainer("minecraft").get().getRoot().getFileSystem();
-//            Class<?> zipFileSystemClass = Class.forName("jdk.nio.zipfs.ZipFileSystem");
-//            Field zfpathField = zipFileSystemClass.getDeclaredField("zfpath");
-//
-//            Path path = (Path) theUnsafe.getObject(zipFileSystemInstance, theUnsafe.objectFieldOffset(zfpathField));
-//            currentMinecraftFile = path.toFile();
-//        } catch (Throwable e) {
-//            throw new RuntimeException("No matched client-intermediary.jar found.", e);
-//        }
-//        LoggerManagerUtil.info("Finish using sun.misc.Unsafe package. JVM won't crash");
+        File currentMinecraftFile = null;
+        try {
+            // Get Unsafe instance
+            Unsafe theUnsafe = null;
+            Field theUnsafeField = Unsafe.class.getDeclaredField("theUnsafe");
+            theUnsafeField.setAccessible(true);
+            theUnsafe = (Unsafe) theUnsafeField.get(null);
+
+            // Get zipFileSystemInstance.zfpath
+            Object zipFileSystemInstance = FabricLoaderImpl.INSTANCE.getModContainer("minecraft").get().getRoot().getFileSystem();
+            Class<?> zipFileSystemClass = Class.forName("jdk.nio.zipfs.ZipFileSystem");
+            Field zfpathField = zipFileSystemClass.getDeclaredField("zfpath");
+
+            Path path = (Path) theUnsafe.getObject(zipFileSystemInstance, theUnsafe.objectFieldOffset(zfpathField));
+            currentMinecraftFile = path.toFile();
+        } catch (Throwable e) {
+            throw new RuntimeException("No matched client-intermediary.jar found.", e);
+        }
+        LoggerManagerUtil.info("Finish using sun.misc.Unsafe package. JVM won't crash");
 
         if (FabricLoader.getInstance().isDevelopmentEnvironment()) {
             LoggerManagerUtil.info("Remapping: Prepare TinyRemapper in developing environment.");
             File intermediaryFileTemp = new File(FabricLoader.getInstance().getGameDir().toFile(), "voxellatest/minecraft-intermediary.jar");
-            invokeRemapper(NamespaceUtil.MAPPING_YARN, NamespaceUtil.MAPPING_INTERMEDIARY, currentMinecraftFile, intermediaryFileTemp);
+            invokeRemapper(getRemapFile(), NamespaceUtil.MAPPING_YARN, NamespaceUtil.MAPPING_INTERMEDIARY, currentMinecraftFile, intermediaryFileTemp);
             minecraftIntermediaryFile = intermediaryFileTemp;
             minecraftYarnFile = currentMinecraftFile;
         } else {
             LoggerManagerUtil.info("Remapping: Prepare TinyRemapper in normal environment.");
             File yarnFileTemp = new File(FabricLoader.getInstance().getGameDir().toFile(), "voxellatest/minecraft-yarn.jar");
-            invokeRemapper(NamespaceUtil.MAPPING_INTERMEDIARY, NamespaceUtil.MAPPING_YARN, currentMinecraftFile, yarnFileTemp);
+            invokeRemapper(getRemapFile(), NamespaceUtil.MAPPING_INTERMEDIARY, NamespaceUtil.MAPPING_YARN, currentMinecraftFile, yarnFileTemp);
             minecraftIntermediaryFile = currentMinecraftFile;
             minecraftYarnFile = yarnFileTemp;
         }
@@ -222,22 +330,22 @@ public class VoxelMapClassRemapUtil {
         ModInjector.run();
     }
 
-    private static void invokeRemapper(String fromName, String toName, File fromFile, File toFile) {
+    private static void invokeRemapper(File remapperFile, String fromName, String toName, File fromFile, File toFile) {
         if (fromName.equals(NamespaceUtil.MAPPING_INTERMEDIARY) && minecraftIntermediaryFile != null) {
             try {
-                TinyRemapperAgency.run(getRemapFile(), fromName, toName, fromFile, toFile, minecraftIntermediaryFile);
+                TinyRemapperAgency.run(remapperFile, fromName, toName, fromFile, toFile, minecraftIntermediaryFile);
             } catch (Throwable t) {
                 throw new RuntimeException("An Error was thrown while invoking Tiny Remapper.", t);
             }
         } else if (fromName.equals(NamespaceUtil.MAPPING_YARN) && minecraftYarnFile != null) {
             try {
-                TinyRemapperAgency.run(getRemapFile(), fromName, toName, fromFile, toFile, minecraftYarnFile);
+                TinyRemapperAgency.run(remapperFile, fromName, toName, fromFile, toFile, minecraftYarnFile);
             } catch (Throwable t) {
                 throw new RuntimeException("An Error was thrown while invoking Tiny Remapper.", t);
             }
         } else {
             try {
-                TinyRemapperAgency.run(getRemapFile(), fromName, toName, fromFile, toFile, null);
+                TinyRemapperAgency.run(remapperFile, fromName, toName, fromFile, toFile, null);
             } catch (Throwable t) {
                 throw new RuntimeException("An Error was thrown while invoking Tiny Remapper.", t);
             }
@@ -272,7 +380,8 @@ public class VoxelMapClassRemapUtil {
     }
 
     public synchronized static File getRemapFile() {
-        File tinyRemapFile = new File(ConfigFileManager.configRootDirectory, String.format("yarn-%s.tiny", ModInfoUtil.getMinecraftVersion()));
+        File voxellatestFolder = new File(FabricLoader.getInstance().getGameDir().toFile(), "voxellatest");
+        File tinyRemapFile = new File(voxellatestFolder, String.format("yarn-%s.tiny", getMinecraftVersion()));
 
         if (!tinyRemapFile.exists()) {
             downloadMappingFile(tinyRemapFile);
@@ -314,6 +423,8 @@ public class VoxelMapClassRemapUtil {
         }
     }
 
+
+    @SuppressWarnings("all")
     private static void getMappingVersion() {
         if (currentMappingVersionCache != null) {
             return;
@@ -370,7 +481,7 @@ public class VoxelMapClassRemapUtil {
                 String path = null;
                 for (int i = 0; i < jsonArray.size(); i++) {
                     String itemGameVersion = jsonArray.get(i).getAsJsonObject().get("gameVersion").getAsString();
-                    if (itemGameVersion.equals(ModInfoUtil.getMinecraftVersion())) {
+                    if (itemGameVersion.equals(getMinecraftVersion())) {
                         if (currentBuildVersion < jsonArray.get(i).getAsJsonObject().get("build").getAsInt()) {
                             currentBuildVersion = jsonArray.get(i).getAsJsonObject().get("build").getAsInt();
                             path = jsonArray.get(i).getAsJsonObject().get("version").getAsString();
@@ -378,12 +489,38 @@ public class VoxelMapClassRemapUtil {
                     }
                 }
                 if (currentBuildVersion == -1) {
-                    throw new RuntimeException(String.format("No matching yarn version found for minecarft \"%s\".", ModInfoUtil.getMinecraftVersion()));
+                    throw new RuntimeException(String.format("No matching yarn version found for minecarft \"%s\".", getMinecraftVersion()));
                 }
                 currentMappingVersionCache = path;
             } catch (Throwable e) {
                 throw new RuntimeException("Broken data from \"https://meta.fabricmc.net/v2/versions/yarn\".", e);
             }
+        }
+    }
+
+    public synchronized static String getMinecraftVersion() {
+        if (currentMinecraftVersion != null) {
+            return currentMinecraftVersion;
+        }
+        LoggerManagerUtil.info("Getting minecraft version from \"/version.json\"");
+        URL versionJson = VoxelMapClassRemapUtil.class.getResource("/version.json");
+        if (versionJson != null) {
+            try (InputStream is = versionJson.openStream();) {
+                JsonElement object = new Gson().fromJson(new String(is.readAllBytes()), JsonElement.class);
+                if (object.isJsonObject()) {
+                    if (object.getAsJsonObject().get("name").isJsonPrimitive()) {
+                        if (object.getAsJsonObject().get("name").getAsJsonPrimitive().isString()) {
+                            currentMinecraftVersion = object.getAsJsonObject().get("name").getAsJsonPrimitive().getAsString();
+                            return currentMinecraftVersion;
+                        }
+                    }
+                }
+                throw new RuntimeException(new JsonParseException("Cannot read $.name option as String in /version.json."));
+            } catch (RuntimeException | IOException t) {
+                throw new RuntimeException(new IOException("An Error happend while reading /version.json."));
+            }
+        } else {
+            throw new RuntimeException(new NoSuchFileException("Cannnot read resource /version.json."));
         }
     }
 
