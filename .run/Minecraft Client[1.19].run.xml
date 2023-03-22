@@ -5,7 +5,7 @@
     <option name="VM_PARAMETERS" value="-Dfabric.dli.config=C:\Users\Jacky\AppData\Cache[bg]\modDev\voxelLatest\remap1.19\.gradle\loom-cache\launch.cfg -Dfabric.dli.env=client -Dfabric.dli.main=net.fabricmc.loader.impl.launch.knot.KnotClient -Djava.security.manager=allow -Dmixin.debug.export=true" />
     <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$/remap1.19/run/" />
     <method v="2">
-      <option name="MakeProject" enabled="true" />
+      <option name="Make" enabled="true" />
     </method>
   </configuration>
 </component>

@@ -27,42 +27,10 @@ repositories {
 	}
 }
 
-task buildVoxelLib {
-	dependsOn compileJava
-	dependsOn processResources
-	dependsOn classes
-	dependsOn jar
-
-	BiFunction<File, File, Void> copyTo = (File rawFile, File targetFile) -> {
-		if (targetFile.exists()) {
-			targetFile.delete()
-		}
-		try (
-				FileInputStream fileInputStream = new FileInputStream(rawFile)
-				FileOutputStream fileOutputStream = new FileOutputStream(targetFile)
-		) {
-			fileInputStream.transferTo(fileOutputStream)
-		}
-	}
-	File releaseVersionFile = new File("../build/libs/${rootProject.archives_base_name}-${rootProject.mod_version}.jar")
-	File devVersionFile = new File("../build/libs/${rootProject.archives_base_name}-${rootProject.mod_version}-dev.jar")
-	for (File mavenFile: new File("../.gradle/loom-cache/remapped_mods").listFiles()) {
-		File versionDir = new File(mavenFile, "${rootProject.maven_group}/${rootProject.archives_base_name}/${rootProject.mod_version}")
-		File mavenReleaseVersionFile = new File(versionDir, "${rootProject.archives_base_name}-${rootProject.mod_version}.jar")
-		File mavenDevVersionFile = new File(versionDir, "${rootProject.archives_base_name}-${rootProject.mod_version}-dev.jar")
-
-		copyTo(releaseVersionFile, mavenReleaseVersionFile)
-		copyTo(devVersionFile, mavenDevVersionFile)
-	}
-	println ":overwrite Voxel Latest Dependency"
-}
-
 remapJar {
-	nestedJars.from file("../build/devlibs/${rootProject.archives_base_name}-${rootProject.mod_version}-dev.jar")
 }
 
 afterEvaluate {
-	compileJava.dependsOn(rootProject.buildVoxelLib)
 }
 
 dependencies {
