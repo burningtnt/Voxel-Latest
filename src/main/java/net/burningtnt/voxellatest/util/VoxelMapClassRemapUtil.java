@@ -93,8 +93,6 @@ public class VoxelMapClassRemapUtil {
     }
 
     private static void downloadVoxelMapJarFile() {
-        FabricLoader fabricLoader = FabricLoader.getInstance();
-
         voxelMapJarFile = ModInfoUtil.getVoxelMapRawFile();
 
         String url = "https://mediafilez.forgecdn.net/files/3345/206/fabricmod_VoxelMap-1.10.15_for_1.17.0.jar";

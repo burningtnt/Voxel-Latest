@@ -2,6 +2,7 @@ package net.burningtnt.voxellatest.entrypoints;
 
 import net.burningtnt.voxellatest.util.LoggerManagerUtil;
 import net.burningtnt.voxellatest.util.VoxelMapClassRemapUtil;
+import net.fabricmc.loader.api.FabricLoader;
 import org.objectweb.asm.tree.ClassNode;
 import org.spongepowered.asm.mixin.Mixins;
 import org.spongepowered.asm.mixin.extensibility.IMixinConfigPlugin;
@@ -18,13 +19,14 @@ public class MixinPluginEntrypointImpl implements IMixinConfigPlugin {
         try {
             LoggerManagerUtil.info("Start to remap VoxelMap");
             VoxelMapClassRemapUtil.run();
+            LoggerManagerUtil.info("Success to remap VoxelMap");
         } catch (Throwable e) {
-            System.err.println("[Voxel Latest] An Fatal Error happended while invoking net.burningtnt.voxellatest.util.VoxelMapClassRemapUtil.run .");
+            System.err.println("[Voxel Latest] A fatal error happended while invoking net.burningtnt.voxellatest.util.VoxelMapClassRemapUtil.run .");
             e.printStackTrace(System.err);
             try {
                 System.exit(-1);
             } catch (Throwable e2) {
-                System.err.println("[Voxel Latest] An Fatal Error happened while invoking java.lang.System.exit . Use Unsafe package to crash JVM.");
+                System.err.println("[Voxel Latest] A fatal error happened while invoking java.lang.System.exit . Use Unsafe package to crash JVM.");
                 e.printStackTrace(System.err);
 
                 try {
@@ -34,7 +36,7 @@ public class MixinPluginEntrypointImpl implements IMixinConfigPlugin {
                     Method getObjectMethod = unsafeClass.getMethod("getObject", Object.class, long.class);
                     getObjectMethod.invoke(theUnsafeField.get(null), null, 0);
                 } catch (Throwable e3) {
-                    System.err.println("[Voxel Latest] An Fatal Error happened while using Unsafe package to crash JVM. Use infinity loop instead");
+                    System.err.println("[Voxel Latest] A fatal error happened while using Unsafe package to crash JVM. Use infinity loop instead.");
                     e3.printStackTrace(System.err);
 
                     while (true) {

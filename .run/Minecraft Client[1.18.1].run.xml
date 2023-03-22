@@ -1,9 +1,9 @@
 <component name="ProjectRunConfigurationManager">
-  <configuration default="false" name="Minecraft Client[1.19]" type="Application" factoryName="Application">
+  <configuration default="false" name="Minecraft Client[1.18.1]" type="Application" factoryName="Application">
     <option name="MAIN_CLASS_NAME" value="net.fabricmc.devlaunchinjector.Main" />
-    <module name="net.burningtnt.voxelLatest.remap1.19.main" />
+    <module name="net.burningtnt.voxelLatest.remap1.18.1.main" />
     <option name="VM_PARAMETERS" value="-Dfabric.dli.config=..\.gradle\loom-cache\launch.cfg -Dfabric.dli.env=client -Dfabric.dli.main=net.fabricmc.loader.impl.launch.knot.KnotClient -Djava.security.manager=allow -Dmixin.debug.export=true" />
-    <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$/remap1.19/run/" />
+    <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$/remap1.18.1/run/" />
     <method v="2">
       <option name="Make" enabled="true" />
     </method>
