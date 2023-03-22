@@ -1,3 +1,5 @@
+import org.gradle.api.internal.tasks.DefaultTaskInputs
+
 plugins {
     id 'fabric-loom' version '0.12-SNAPSHOT'
     id 'maven-publish'
@@ -31,7 +33,7 @@ remapJar {
 }
 
 afterEvaluate {
-//    compileJava.dependsOn(rootProject.buildVoxelLib)
+    rootProject.prepareRemapJar.dependsOn.clear()
 }
 
 dependencies {
@@ -41,11 +43,7 @@ dependencies {
     modImplementation "net.fabricmc:fabric-loader:${project.loader_version}"
 
     // Voxel Latest
-//    modImplementation files("../build/devlibs/${rootProject.archives_base_name}-${rootProject.mod_version}-dev.jar")
     implementation rootProject
-
-    // Fabric API. This is technically optional, but you probably want it anyway.
-    // modImplementation "net.fabricmc.fabric-api:fabric-api:${project.fabric_version}"
 }
 
 processResources {

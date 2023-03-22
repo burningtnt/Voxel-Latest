@@ -126,8 +126,6 @@ public class VoxelMapClassRemapUtil {
             return true;
         }
 
-        FabricLoader fabricLoader = FabricLoader.getInstance();
-
         if (!ModInfoUtil.getModDir().exists()) {
             return true;
         }
@@ -183,9 +181,6 @@ public class VoxelMapClassRemapUtil {
     }
 
     private static void mapVoxelMapJarFile() {
-//        VoxelMapClassRemapUtil.findVoxelMapJarFile();
-        FabricLoader fabricLoader = FabricLoader.getInstance();
-
         if (!shouldUpdateVoxelMapJarFileMapCache()) {
             LoggerManagerUtil.info("Find remapped.jar. Skip Remapping");
             return;
@@ -322,33 +317,6 @@ public class VoxelMapClassRemapUtil {
                 throw new RuntimeException("An Error was thrown while invoking Tiny Remapper.", t);
             }
         }
-//        ArrayList<String> tinyRemapperArgs = new ArrayList<>(List.of(fromFile.getAbsolutePath(), toFile.getAbsolutePath(), remapperFile.getAbsolutePath(), fromName, toName));
-//        if (fromName.equals(NamespaceUtil.MAPPING_INTERMEDIARY) && minecraftIntermediaryFile != null) {
-//            tinyRemapperArgs.add(minecraftIntermediaryFile.getAbsolutePath());
-//        }
-//        if (fromName.equals(NamespaceUtil.MAPPING_YARN) && minecraftYarnFile != null) {
-//            tinyRemapperArgs.add(minecraftYarnFile.getAbsolutePath());
-//        }
-//        String[] args = new String[tinyRemapperArgs.size()];
-//        tinyRemapperArgs.toArray(args);
-//
-//        SecurityManagerNoSystemExitUtil.enableCurrentSecurityManager();
-//        LoggerManagerUtil.info("===== Here is the beginning of the output of Tiny Remapper =====");
-//        ClassLoader classLoader = Thread.currentThread().getContextClassLoader();
-//        Thread.currentThread().setContextClassLoader(classLoader.getClass().getClassLoader());
-//
-//        try {
-//            net.fabricmc.tinyremapper.Main.main(args);
-//        } catch (Throwable t) {
-//            Thread.currentThread().setContextClassLoader(classLoader);
-//            SecurityManagerNoSystemExitUtil.disableCurrentSecurityManager();
-//            LoggerManagerUtil.fail("An Error was thrown while invoking Lnet/fabricmc/tinyremapper/Main;main([Ljava/lang/String;)V", t);
-//            System.exit(-1);
-//        }
-//
-//        Thread.currentThread().setContextClassLoader(classLoader);
-//        LoggerManagerUtil.info("===== Here is the ending of the output of Tiny Remapper =====");
-//        SecurityManagerNoSystemExitUtil.disableCurrentSecurityManager();
     }
 
     public synchronized static File getRemapFile() {
