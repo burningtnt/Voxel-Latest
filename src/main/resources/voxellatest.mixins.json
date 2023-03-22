@@ -1,0 +1,14 @@
+{
+  "required": true,
+  "minVersion": "0.8",
+  "package": "net.burningtnt.voxellatest.mixins",
+  "plugin": "net.burningtnt.voxellatest.entrypoints.MixinPluginEntrypointImpl",
+  "compatibilityLevel": "JAVA_17",
+  "mixins": [
+  ],
+  "client": [
+  ],
+  "injectors": {
+    "defaultRequire": 1
+  }
+}

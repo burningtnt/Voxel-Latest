@@ -1,0 +1,37 @@
+{
+  "schemaVersion": 1,
+  "id": "voxellatest",
+  "version": "${version}",
+
+  "name": "Voxel Latest",
+  "description": "A mod to make Voxelmap could work accurately in latest versions.",
+  "authors": [
+    "Burning_TNT"
+  ],
+  "contact": {
+  },
+
+  "license": "CC0-1.0",
+  "icon": "assets/voxellatest/icon.png",
+
+  "environment": "client",
+  "entrypoints": {
+    "client": [
+      "net.burningtnt.voxellatest.entrypoints.ClientEntrypointImpl"
+    ]
+  },
+  "mixins": [
+    "voxellatest.mixins.json"
+  ],
+
+  "depends": {
+    "fabricloader": ">=0.14.6",
+    "minecraft": ">=1.18.1",
+    "java": ">=17",
+    "voxellatest-remapper": "*"
+  },
+
+  "breaks": {
+    "voxelmap": "*"
+  }
+}

@@ -1,0 +1,55 @@
+{
+  "schemaVersion": 1,
+  "id": "voxellatest-remapper",
+  "version": "1.3.0",
+  "name": "Voxel Latest Remapper",
+  "description": "A mod to make Voxelmap could work accurately in latest versions.",
+  "authors": [
+    "Burning_TNT",
+    "ZekerZhayard",
+    "3TUSK"
+  ],
+  "contact": {
+  },
+  "license": "CC0-1.0",
+  "icon": "assets/voxellatest/icon.png",
+  "environment": "client",
+  "entrypoints": {
+  },
+  "depends": {
+    "fabricloader": ">=0.14.6",
+    "minecraft": "=1.18.2",
+    "java": ">=17",
+    "voxellatest": "*"
+  },
+  "custom": {
+    "voxellatest.remapperConfigClasses": [
+      "net.burningtnt.voxellatestRemapper.impl.com.mamiyaotaru.voxelmap.ColorManager",
+      "net.burningtnt.voxellatestRemapper.impl.com.mamiyaotaru.voxelmap.fabricmod.mixins.MixinWorldRenderer",
+      "net.burningtnt.voxellatestRemapper.impl.com.mamiyaotaru.voxelmap.fabricmod.mixins.ONMixinWorldRenderer",
+      "net.burningtnt.voxellatestRemapper.impl.com.mamiyaotaru.voxelmap.fabricmod.mixins.APIMixinReloadableResourceManagerImpl",
+      "net.burningtnt.voxellatestRemapper.impl.com.mamiyaotaru.voxelmap.gui.overridden.GuiButtonText",
+      "net.burningtnt.voxellatestRemapper.impl.com.mamiyaotaru.voxelmap.gui.overridden.GuiOptionButtonMinimap",
+      "net.burningtnt.voxellatestRemapper.impl.com.mamiyaotaru.voxelmap.gui.overridden.GuiSlotMinimap",
+      "net.burningtnt.voxellatestRemapper.impl.com.mamiyaotaru.voxelmap.gui.overridden.PopupGuiButton",
+      "net.burningtnt.voxellatestRemapper.impl.com.mamiyaotaru.voxelmap.gui.overridden.PopupGuiScreen",
+      "net.burningtnt.voxellatestRemapper.impl.com.mamiyaotaru.voxelmap.gui.GuiAddWaypoint",
+      "net.burningtnt.voxellatestRemapper.impl.com.mamiyaotaru.voxelmap.gui.GuiMobs",
+      "net.burningtnt.voxellatestRemapper.impl.com.mamiyaotaru.voxelmap.gui.GuiSelectPlayer",
+      "net.burningtnt.voxellatestRemapper.impl.com.mamiyaotaru.voxelmap.gui.GuiSlotDimension_DimensionItem",
+      "net.burningtnt.voxellatestRemapper.impl.com.mamiyaotaru.voxelmap.gui.GuiSlotMobs",
+      "net.burningtnt.voxellatestRemapper.impl.com.mamiyaotaru.voxelmap.gui.GuiSlotMobs_MobItem",
+      "net.burningtnt.voxellatestRemapper.impl.com.mamiyaotaru.voxelmap.gui.GuiSlotWaypoints",
+      "net.burningtnt.voxellatestRemapper.impl.com.mamiyaotaru.voxelmap.gui.GuiSlotWaypoints_WaypointItem",
+      "net.burningtnt.voxellatestRemapper.impl.com.mamiyaotaru.voxelmap.gui.GuiWaypoints",
+      "net.burningtnt.voxellatestRemapper.impl.com.mamiyaotaru.voxelmap.gui.GuiButtonRowListPlayers_Row",
+      "net.burningtnt.voxellatestRemapper.impl.com.mamiyaotaru.voxelmap.Radar",
+      "net.burningtnt.voxellatestRemapper.impl.com.mamiyaotaru.voxelmap.Map",
+      "net.burningtnt.voxellatestRemapper.impl.com.mamiyaotaru.voxelmap.VoxelMap",
+      "net.burningtnt.voxellatestRemapper.impl.com.mamiyaotaru.voxelmap.util.BiomeRepository",
+      "net.burningtnt.voxellatestRemapper.impl.com.mamiyaotaru.voxelmap.persistent.PersistentMap",
+      "net.burningtnt.voxellatestRemapper.impl.com.mamiyaotaru.voxelmap.persistent.CachedRegion",
+      "net.burningtnt.voxellatestRemapper.impl.com.mamiyaotaru.voxelmap.persistent.GuiPersistentMap"
+    ]
+  }
+}
