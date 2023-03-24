@@ -28,6 +28,13 @@ repositories {
 remapJar {
 }
 
+afterEvaluate {
+    File releaseDir = new File(project.rootDir, "release")
+    if (!releaseDir.exists()) {
+        releaseDir.mkdir()
+    }
+}
+
 task copyRemapperBuildResult {
     dependsOn build
 
