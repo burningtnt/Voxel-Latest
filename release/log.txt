@@ -1,0 +1,98 @@
+﻿让 VoxelMap 在高版本可以运行！
+Voxel Latest 1.0.0 正式发布，他可以让 Voxel Map 在 1.17+ 版本正常使用。
+用不惯 Xaero's Mini Map 的风格？没关系！换回 Voxel Map！
+使用方法：
+1 在 mods 文件夹内放入本 Mod。
+2 保持网络连接通畅，首次使用 Voxel Latest 时需要从互联网上下载数据并重映射 Voxel Map，这可能需要一段时间。
+3 尽情玩吧！
+* 如果您使用过低于 1.3.0 的 Voxel Latest，您需要删除游戏文件夹下的 voxellatest 文件夹以获取更新。
+
+[
+  {
+    "type": "card",
+    "theme": "info",
+    "size": "lg",
+    "modules": [
+      {
+        "type": "header",
+        "text": {
+          "type": "plain-text",
+          "content": "让 VoxelMap 在高版本可以运行！"
+        }
+      },
+      {
+        "type": "section",
+        "text": {
+          "type": "kmarkdown",
+          "content": "让 Voxel Map 在 1.17+ 版本正常使用！\n用不惯 Xaero's Mini Map 的风格？没关系！换回 Voxel Map！"
+        }
+      },
+      {
+        "type": "divider"
+      },
+      {
+        "type": "section",
+        "text": {
+          "type": "kmarkdown",
+          "content": "使用方法：\n1. 在 mods 文件夹内放入本 Mod。\n2. 保持网络连接通畅，首次使用 Voxel Latest 时需要从互联网上下载数据并重映射 Voxel Map，这可能需要一段时间。\n3. 尽情玩吧！"
+        }
+      },
+      {
+        "type": "context",
+        "elements": [
+          {
+            "type": "plain-text",
+            "content": "如果您使用过低于 1.3.0 版本的 Voxel Latest，您需要删除游戏文件夹下的 voxellatest 文件夹以获取更新。"
+          }
+        ]
+      },
+      {
+        "type": "divider"
+      },
+      {
+        "type": "action-group",
+        "elements": [
+          {
+            "type": "button",
+            "theme": "info",
+            "value": "https://www.curseforge.com/minecraft/mc-mods/voxel-latest/files/all",
+            "click": "link",
+            "text": {
+              "type": "plain-text",
+              "content": "前往 curseforge.com 下载"
+            }
+          }
+        ]
+      }
+    ]
+  }
+]
+
+更新日志：
+2023.02.06 11.31 v1.0.0：
+    1 现在不需要手动下载 Voxel Map 了
+    2 修复了 Voxel Lib 不兼容 1.18.1 较低版本 Fabric Loader 的 Bug
+    3 更改了 Voxel Map 资源包加载逻辑，使其兼容更低版本
+    4 更改了 Voxel Map 资源包名称，使其更加契合游戏原版
+
+2023.02.07 11.10 v1.0.1:
+
+    1 修复了 Voxel Lib 使用缓存启动时会出现 NPE 异常的 Bug
+
+2023.02.07 11.10 v1.0.2:
+
+    1 修复了 v1.0.1 没能修复掉的 Voxel Lib 使用缓存启动时会出现 NPE 异常的 Bug
+
+2023.02.07 11.10 v1.1.0:
+
+    1 更改了注入逻辑，因此不再需要添加内置资源包
+
+2023.02.08 21.52 v1.2.0:
+    1 更改了 Voxel Lib 选择 Voxel Remapper 的逻辑，优化了性能
+    2 支持 1.19.0
+
+2023.02.08 16.16 v1.3.0:
+    1 更改了 Voxel Lib 更新缓存的逻辑，现在可以自动判断缓存是否可以适配当前游戏
+    2 更改了 Voxel Lib 注入游戏的逻辑，现在其他 mod 可以正常的对 VoxelMap 添加 Mixin
+    3 修复了 Voxel Latest 和 VoxelMap 一同放入 mods 文件夹时不会给出错误的 Bug
+下载：https://www.curseforge.com/minecraft/mc-mods/voxel-latest/files
