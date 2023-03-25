@@ -237,12 +237,7 @@ public class VoxelMapClassRemapUtil {
         if ("ignoreDeveloping".equals(System.getProperty("voxellatest.cache"))) {
             return false;
         }
-        List<Path> pathList = FabricLoader.getInstance().getModContainer(ModInfoUtil.VOXEL_REMAPPER).get().getRootPaths();
-        try {
-            return pathList.get(0).toFile().isDirectory();
-        } catch (Throwable e) {
-            return false;
-        }
+        return FabricLoader.getInstance().getModContainer(ModInfoUtil.VOXEL_REMAPPER).get().getOrigin().getPaths().get(0).toFile().isDirectory();
     }
 
 
@@ -270,7 +265,7 @@ public class VoxelMapClassRemapUtil {
 
         LoggerManagerUtil.info("Getting minecraftintermediary file");
 
-        File currentMinecraftFile = FabricLoader.getInstance().getModContainer(ModInfoUtil.MINECRAFT).get().getRootPaths().get(0).toFile();
+        File currentMinecraftFile = FabricLoader.getInstance().getModContainer(ModInfoUtil.MINECRAFT).get().getOrigin().getPaths().get(0).toFile();
 
         if (FabricLoader.getInstance().isDevelopmentEnvironment()) {
             LoggerManagerUtil.info("Remapping: Prepare TinyRemapper in developing environment.");
@@ -366,7 +361,7 @@ public class VoxelMapClassRemapUtil {
             return;
         }
         if (FabricLoader.getInstance().isDevelopmentEnvironment()) {
-            Path path = FabricLoader.getInstance().getModContainer(ModInfoUtil.MINECRAFT).get().getRootPaths().get(0).toFile().toPath();
+            Path path = FabricLoader.getInstance().getModContainer(ModInfoUtil.MINECRAFT).get().getOrigin().getPaths().get(0);
             String pathName = path.toFile().getParentFile().getName();
             int start = -1;
             for (int i = 0; i < 4; i++) {

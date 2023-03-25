@@ -45,14 +45,16 @@ dependencies {
     modImplementation "net.fabricmc:fabric-loader:${project.loader_version}"
 
     // Voxel Latest
-    implementation rootProject
+    implementation rootProject, {
+        transitive = false
+    }
 }
 
 processResources {
     inputs.property "version", project.version
 
     filesMatching("fabric.mod.json") {
-        expand "version": project.version
+        expand "version": project.version,"voxelLatestVersion": rootProject.mod_version,"minecraftVersion": project.minecraft_version
     }
 }
 

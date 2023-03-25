@@ -18,6 +18,14 @@ public class DimensionType extends AbstractVoxelMapInsnWatcher {
                     if (methodInsnNode.owner.equals("net/minecraft/world/dimension/DimensionType") && methodInsnNode.name.equals("method_31110") && methodInsnNode.desc.equals("()D")) {
                         methodInsnNode.name = "coordinateScale";
                     }
+
+                    if (methodInsnNode.owner.equals("net/minecraft/client/render/BufferBuilder") && methodInsnNode.name.equals("end") && methodInsnNode.desc.equals("()V")) {
+                        methodInsnNode.desc = "()Lnet/minecraft/client/render/BufferBuilder$BuiltBuffer;";
+                    }
+
+                    if (methodInsnNode.owner.equals("net/minecraft/text/MutableText") && methodInsnNode.name.equals("method_27692") && methodInsnNode.desc.equals("(Lnet/minecraft/util/Formatting;)Lnet/minecraft/text/MutableText;")) {
+                        methodInsnNode.name = "formatted";
+                    }
                 }
 
                 abstractInsnNode = abstractInsnNode.getNext();
