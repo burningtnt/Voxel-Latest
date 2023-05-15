@@ -16,7 +16,10 @@ public class ModInfoUtil {
 
     private static final File MOD_DIR = new File(FabricLoader.getInstance().getGameDir().toFile(), "voxellatest");
     private static final File VOXEL_MAP_RAW_FILE = new File(MOD_DIR, "resource.jar");
+    private static final File VOXEL_MAP_REMAPPING_INTERMEDIARY = new File(MOD_DIR, "remapping-intermediary.jar");
+    private static final File VOXEL_MAP_REMAPPING_ASM = new File(MOD_DIR, "remapping-ASM.jar");
     private static final File VOXEL_MAP_REMAPPED_FILE = new File(MOD_DIR, "remapped.jar");
+
     private static final File VERSION_CONFIG_FILE = new File(MOD_DIR, "version-config.json");
 
     public static File getModDir() {
@@ -33,5 +36,13 @@ public class ModInfoUtil {
 
     public static File getVersionConfigFile() {
         return VERSION_CONFIG_FILE;
+    }
+
+    public static File getVoxelMapIntermediaryRemappingFile() {
+        return VOXEL_MAP_REMAPPING_INTERMEDIARY;
+    }
+
+    public static File getVoxelMapASMRemappingFile() {
+        return VOXEL_MAP_REMAPPING_ASM;
     }
 }

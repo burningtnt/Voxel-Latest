@@ -7,7 +7,6 @@ import net.burningtnt.voxellatest.mappers.ASMRemapManager;
 import net.fabricmc.loader.api.FabricLoader;
 import net.fabricmc.loader.impl.launch.FabricLauncherBase;
 import org.objectweb.asm.ClassReader;
-import org.objectweb.asm.Opcodes;
 import org.objectweb.asm.tree.ClassNode;
 
 import java.io.*;
@@ -16,10 +15,8 @@ import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Path;
 import java.util.Enumeration;
-import java.util.List;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
-import java.util.zip.ZipInputStream;
 import java.util.zip.ZipOutputStream;
 
 /*
@@ -34,14 +31,8 @@ import java.util.zip.ZipOutputStream;
  * * 如果您使用过旧版本的 Voxel Latest，您需要删除游戏文件夹下的 voxellatest 文件夹以获取更新。
  */
 public class VoxelMapClassRemapUtil {
-    private static File voxelMapJarFile = null;
-
-    private static File remappedJarFile = null;
-
     private static String currentMappingVersionCache = null;
     private static boolean hasDone = false;
-    private static File minecraftIntermediaryFile = null;
-    private static File minecraftYarnFile = null;
 
     public static void run() {
         if (hasDone) {
@@ -90,12 +81,10 @@ public class VoxelMapClassRemapUtil {
         if (!hasDone) {
             throw new RuntimeException("Remapping isn't finished yet.");
         }
-        return remappedJarFile;
+        return ModInfoUtil.getVoxelMapRemappedFile();
     }
 
     private static void downloadVoxelMapJarFile() {
-        voxelMapJarFile = ModInfoUtil.getVoxelMapRawFile();
-
         String url = "https://mediafilez.forgecdn.net/files/3345/206/fabricmod_VoxelMap-1.10.15_for_1.17.0.jar";
 
         LoggerManagerUtil.info(String.format("Downloading voxelmap from \"%s\"", url));
@@ -104,7 +93,7 @@ public class VoxelMapClassRemapUtil {
             HttpURLConnection request = (HttpURLConnection) tinyUrl.openConnection();
             request.setReadTimeout(10000);
             request.connect();
-            try (FileOutputStream fileOutputStream = new FileOutputStream(voxelMapJarFile)) {
+            try (FileOutputStream fileOutputStream = new FileOutputStream(ModInfoUtil.getVoxelMapRawFile())) {
                 request.getInputStream().transferTo(fileOutputStream);
             }
         } catch (IOException e) {
@@ -148,19 +137,17 @@ public class VoxelMapClassRemapUtil {
             return true;
         }
 
-        remappedJarFile = ModInfoUtil.getVoxelMapRemappedFile();
-        if (!remappedJarFile.exists()) {
+        if (!ModInfoUtil.getVoxelMapRemappedFile().exists()) {
             return true;
         }
-        if (!remappedJarFile.isFile()) {
+        if (!ModInfoUtil.getVoxelMapRemappedFile().isFile()) {
             return true;
         }
 
-        voxelMapJarFile = ModInfoUtil.getVoxelMapRawFile();
-        if (!voxelMapJarFile.exists()) {
+        if (!ModInfoUtil.getVoxelMapRawFile().exists()) {
             return true;
         }
-        if (!voxelMapJarFile.isFile()) {
+        if (!ModInfoUtil.getVoxelMapRawFile().isFile()) {
             return true;
         }
 
@@ -183,38 +170,35 @@ public class VoxelMapClassRemapUtil {
             throw new SecurityException(String.format("Cannot make directory at \"%s\".", ModInfoUtil.getModDir().getAbsolutePath()));
         }
 
+        // ModInfoUtil.getVoxelMapRawFile() -> ModInfoUtil.getVoxelMapIntermediaryRemappingFile() -> ModInfoUtil.getVoxelMapASMRemappingFile(), ModInfoUtil.getVoxelMapRemappedFile()
+
+        NamespaceUtil.init();
         downloadVoxelMapJarFile();
+        initMappingVersion();
 
-        ModInfoUtil.getMinecraftVersion();
-        getMappingVersion();
-        getMinecraftFile();
-
-        remappedJarFile = ModInfoUtil.getVoxelMapRemappedFile();
-
-        // Remapping...
+        // Remapping: 1.17 intermediary -> current yarn
         LoggerManagerUtil.info(String.format("Remapping: %s %s -> %s %s", ModInfoUtil.getMinecraftVersion(), NamespaceUtil.MAPPING_INTERMEDIARY, ModInfoUtil.getMinecraftVersion(), NamespaceUtil.MAPPING_YARN));
-        File remapFileDynamic = getRemapFile();
-        invokeRemapper(remapFileDynamic, NamespaceUtil.MAPPING_INTERMEDIARY, NamespaceUtil.MAPPING_YARN, voxelMapJarFile, remappedJarFile);
+        NamespaceUtil.run(NamespaceUtil.MAPPING_INTERMEDIARY, NamespaceUtil.MAPPING_YARN, ModInfoUtil.getVoxelMapRawFile(), ModInfoUtil.getVoxelMapIntermediaryRemappingFile());
 
-        LoggerManagerUtil.info(String.format("Remapping: %s %s -> %s %s", ModInfoUtil.getMinecraftVersion(), NamespaceUtil.MAPPING_YARN, ModInfoUtil.getMinecraftVersion(), NamespaceUtil.MAPPING_YARN));
-        prepareRemapByASM();
-        remapByASM();
+        // Remapping: ASM Remapping
+        LoggerManagerUtil.info("Remapping: ASM Remapping");
+        prepareRemapByASM(ModInfoUtil.getVoxelMapIntermediaryRemappingFile());
+        remapByASM(ModInfoUtil.getVoxelMapIntermediaryRemappingFile(), ModInfoUtil.getVoxelMapASMRemappingFile());
 
         if (FabricLoader.getInstance().isDevelopmentEnvironment()) {
             LoggerManagerUtil.info(String.format("Remapping: Minecraft %s developing environment detected.", ModInfoUtil.getMinecraftVersion()));
+            try (
+                    FileInputStream fileInputStream = new FileInputStream(ModInfoUtil.getVoxelMapASMRemappingFile());
+                    FileOutputStream fileOutputStream = new FileOutputStream(ModInfoUtil.getVoxelMapRemappedFile())
+            ) {
+                fileInputStream.transferTo(fileOutputStream);
+            } catch (IOException e) {
+                throw new RuntimeException(e);
+            }
         } else {
+            // Remapping: current yarn -> current intermediary
             LoggerManagerUtil.info(String.format("Remapping: %s %s -> %s %s", ModInfoUtil.getMinecraftVersion(), NamespaceUtil.MAPPING_YARN, ModInfoUtil.getMinecraftVersion(), NamespaceUtil.MAPPING_INTERMEDIARY));
-
-            String nextStepFileName = remappedJarFile.getAbsolutePath();
-            nextStepFileName = nextStepFileName.substring(0, nextStepFileName.length() - getFileType(nextStepFileName).length() - 1) + "_INTERMEDIARY.jar";
-            File nextStepFile = new File(nextStepFileName);
-            invokeRemapper(remapFileDynamic, NamespaceUtil.MAPPING_YARN, NamespaceUtil.MAPPING_INTERMEDIARY, remappedJarFile, nextStepFile);
-            if (!remappedJarFile.delete()) {
-                throw new SecurityException(String.format("Failed to delete file \"%s\"", remappedJarFile.getAbsolutePath()));
-            }
-            if (!nextStepFile.renameTo(remappedJarFile)) {
-                throw new SecurityException(String.format("Failed to rename file \"%s\" to \"%s\"", nextStepFile.getAbsolutePath(), remappedJarFile.getAbsolutePath()));
-            }
+            NamespaceUtil.run(NamespaceUtil.MAPPING_YARN, NamespaceUtil.MAPPING_INTERMEDIARY, ModInfoUtil.getVoxelMapASMRemappingFile(), ModInfoUtil.getVoxelMapRemappedFile());
         }
 
         LoggerManagerUtil.info("Remapping: Finish");
@@ -238,102 +222,13 @@ public class VoxelMapClassRemapUtil {
         ConfigFileManager.writeTo(ModInfoUtil.getVersionConfigFile());
     }
 
-    private static void getMinecraftFile() {
-
-        LoggerManagerUtil.info("Getting minecraftintermediary file");
-
-        File currentMinecraftFile = FabricLoader.getInstance().getModContainer(ModInfoUtil.MINECRAFT).get().getOrigin().getPaths().get(0).toFile();
-
-        if (FabricLoader.getInstance().isDevelopmentEnvironment()) {
-            LoggerManagerUtil.info("Remapping: Prepare TinyRemapper in developing environment.");
-            File intermediaryFileTemp = new File(ModInfoUtil.getModDir(), "minecraft-intermediary.jar");
-            invokeRemapper(getRemapFile(), NamespaceUtil.MAPPING_YARN, NamespaceUtil.MAPPING_INTERMEDIARY, currentMinecraftFile, intermediaryFileTemp);
-            minecraftIntermediaryFile = intermediaryFileTemp;
-            minecraftYarnFile = currentMinecraftFile;
-        } else {
-            LoggerManagerUtil.info("Remapping: Prepare TinyRemapper in normal environment.");
-            File yarnFileTemp = new File(ModInfoUtil.getModDir(), "minecraft-yarn.jar");
-            invokeRemapper(getRemapFile(), NamespaceUtil.MAPPING_INTERMEDIARY, NamespaceUtil.MAPPING_YARN, currentMinecraftFile, yarnFileTemp);
-            minecraftIntermediaryFile = currentMinecraftFile;
-            minecraftYarnFile = yarnFileTemp;
-        }
-    }
-
     private static void addToJVM() {
-        LoggerManagerUtil.info(String.format("Add \"%s\" to Fabric", remappedJarFile.getAbsolutePath()));
-        FabricLauncherBase.getLauncher().addToClassPath(remappedJarFile.toPath());
-//        Mixins.addConfiguration("mixin.voxelmap.json");
-//        Delay the injection of mixin to avoid CME.
+        LoggerManagerUtil.info(String.format("Add \"%s\" to Fabric", ModInfoUtil.getVoxelMapRemappedFile().getAbsolutePath()));
+        FabricLauncherBase.getLauncher().addToClassPath(ModInfoUtil.getVoxelMapRemappedFile().toPath());
         ModInjector.run();
     }
 
-    private static void invokeRemapper(File remapperFile, String fromName, String toName, File fromFile, File toFile) {
-        if (fromName.equals(NamespaceUtil.MAPPING_INTERMEDIARY) && minecraftIntermediaryFile != null) {
-            try {
-                TinyRemapperAgency.run(remapperFile, fromName, toName, fromFile, toFile, minecraftIntermediaryFile);
-            } catch (Throwable t) {
-                throw new RuntimeException("An Error was thrown while invoking Tiny Remapper.", t);
-            }
-        } else if (fromName.equals(NamespaceUtil.MAPPING_YARN) && minecraftYarnFile != null) {
-            try {
-                TinyRemapperAgency.run(remapperFile, fromName, toName, fromFile, toFile, minecraftYarnFile);
-            } catch (Throwable t) {
-                throw new RuntimeException("An Error was thrown while invoking Tiny Remapper.", t);
-            }
-        } else {
-            try {
-                TinyRemapperAgency.run(remapperFile, fromName, toName, fromFile, toFile, null);
-            } catch (Throwable t) {
-                throw new RuntimeException("An Error was thrown while invoking Tiny Remapper.", t);
-            }
-        }
-    }
-
-    public synchronized static File getRemapFile() {
-        File tinyRemapFile = new File(ModInfoUtil.getModDir(), String.format("yarn-%s.tiny", ModInfoUtil.getMinecraftVersion()));
-
-        if (!tinyRemapFile.exists()) {
-            downloadMappingFile(tinyRemapFile);
-        }
-        NamespaceUtil.init(tinyRemapFile);
-        return tinyRemapFile;
-    }
-
-    private static void downloadMappingFile(File tinyRemapFile) {
-        String url = String.format("https://maven.fabricmc.net/net/fabricmc/yarn/%s/yarn-%s-v2.jar", currentMappingVersionCache, currentMappingVersionCache);
-        LoggerManagerUtil.info(String.format("Downloading file from \"%s\"", url));
-        byte[] data;
-        try {
-            URL tinyUrl = new URL(url);
-            HttpURLConnection tinyRequest = (HttpURLConnection) tinyUrl.openConnection();
-            tinyRequest.setReadTimeout(10000);
-            tinyRequest.connect();
-            try (ZipInputStream zipInputStream = new ZipInputStream(tinyRequest.getInputStream())) {
-                boolean flag = false;
-                while (true) {
-                    ZipEntry fileInside = zipInputStream.getNextEntry();
-                    if (fileInside == null) {
-                        break;
-                    }
-                    if (fileInside.getName().equals("mappings/mappings.tiny")) {
-                        try (FileOutputStream fileOutputStream = new FileOutputStream(tinyRemapFile)) {
-                            zipInputStream.transferTo(fileOutputStream);
-                            flag = true;
-                        }
-                        break;
-                    }
-                }
-                if (!flag) {
-                    throw new RuntimeException(String.format("Broken data from \"%s\".", url));
-                }
-            }
-        } catch (IOException e) {
-            throw new RuntimeException(String.format("An Error was thrown while reading data from \"%s\".", url), e);
-        }
-    }
-
-
-    private static void getMappingVersion() {
+    private static void initMappingVersion() {
         if (currentMappingVersionCache != null) {
             return;
         }
@@ -387,10 +282,10 @@ public class VoxelMapClassRemapUtil {
         }
     }
 
-    private static void prepareRemapByASM() {
+    private static void prepareRemapByASM(File fromFile) {
         ASMRemapManager.initRemappers();
 
-        try (ZipFile voxelMapJarZipFile = new ZipFile(remappedJarFile)) {
+        try (ZipFile voxelMapJarZipFile = new ZipFile(fromFile)) {
             Enumeration<? extends ZipEntry> inputEntries = voxelMapJarZipFile.entries();
             while (inputEntries.hasMoreElements()) {
                 ZipEntry fileInside = inputEntries.nextElement();
@@ -413,18 +308,11 @@ public class VoxelMapClassRemapUtil {
         }
     }
 
-    private static void remapByASM() {
-        ZipOutputStream outputStream = null;
-        StringBuilder nextStepFileCacheName = new StringBuilder(remappedJarFile.getAbsolutePath());
-        int offset = nextStepFileCacheName.length() - getFileType(remappedJarFile.getAbsolutePath()).length() - 1;
-        nextStepFileCacheName.insert(offset, "_ASM_REMAPPING");
-        File nextStepFileCache = new File(nextStepFileCacheName.toString());
-        try {
-            outputStream = new ZipOutputStream(new FileOutputStream(nextStepFileCache));
-        } catch (FileNotFoundException e) {
-            throw new RuntimeException(String.format("An Error was thrown while creating a ZipOutputStream for \"%s\".", remappedJarFile.getAbsolutePath()), e);
-        }
-        try (ZipFile voxelMapJarZipFile = new ZipFile(remappedJarFile)) {
+    private static void remapByASM(File fromFile, File toFile) {
+        try (
+                ZipFile voxelMapJarZipFile = new ZipFile(fromFile);
+                ZipOutputStream outputStream = new ZipOutputStream(new FileOutputStream(toFile))
+        ) {
             Enumeration<? extends ZipEntry> inputEntries = voxelMapJarZipFile.entries();
             while (inputEntries.hasMoreElements()) {
                 ZipEntry fileInside = inputEntries.nextElement();
@@ -451,22 +339,6 @@ public class VoxelMapClassRemapUtil {
             outputStream.closeEntry();
         } catch (IOException e) {
             throw new RuntimeException("An Error was thrown while remapping voxelmap jar file.", e);
-        }
-        try {
-            outputStream.closeEntry();
-        } catch (IOException e) {
-            throw new RuntimeException(String.format("An Error was thrown while closing \"%s\".", nextStepFileCache.getAbsolutePath()), e);
-        }
-        try {
-            outputStream.close();
-        } catch (IOException e) {
-            throw new RuntimeException(String.format("An Error was thrown while closing \"%s\".", nextStepFileCache.getAbsolutePath()), e);
-        }
-        if (!remappedJarFile.delete()) {
-            throw new SecurityException(String.format("An Error was thrown while deleting \"%s\"", remappedJarFile.getAbsolutePath()));
-        }
-        if (!nextStepFileCache.renameTo(remappedJarFile)) {
-            throw new SecurityException(String.format("An Error was thrown while renaming \"%s\" to \"%s\"", nextStepFileCache.getAbsolutePath(), remappedJarFile.getAbsolutePath()));
         }
     }
 

@@ -82,13 +82,20 @@ dependencies {
 
     // Voxel Map
     modCompileOnly files(new File(rootProject.rootDir, "source/source.jar").getAbsolutePath())
+
+    // Fabric API. This is technically optional, but you probably want it anyway.
+    modImplementation "net.fabricmc.fabric-api:fabric-api:${project.fabric_version}"
 }
 
 processResources {
+    into("voxellatest") {
+        from(new File(gradle.gradleUserHomeDir, "caches/fabric-loom/${project.minecraft_version}/net.fabricmc.yarn.${project.minecraft_version.replace(".", "_")}.${project.yarn_mappings}-v2/mappings.tiny").getAbsolutePath())
+    }
+
     inputs.property "version", project.version
 
     filesMatching("fabric.mod.json") {
-        expand "version": project.version,"voxelLatestVersion": rootProject.mod_version,"minecraftVersion": project.minecraft_version
+        expand "version": project.version, "voxelLatestVersion": rootProject.mod_version, "minecraftVersion": project.minecraft_version
     }
 }
 

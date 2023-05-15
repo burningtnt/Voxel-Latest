@@ -45,7 +45,7 @@ public class ModInjector {
         Class<?> entryPointMetaDataImplClass = Class.forName("net.fabricmc.loader.impl.metadata.V1ModMetadata$EntrypointMetadataImpl");
         Constructor<?> entryPointMetaDataConstructor = entryPointMetaDataImplClass.getDeclaredConstructor(String.class, String.class);
         entryPointMetaDataConstructor.setAccessible(true);
-        Object entryPointMetaDataImplObject = entryPointMetaDataConstructor.newInstance("default", DefaultLanguageAdapter.INSTANCE);
+        Object entryPointMetaDataImplObject = entryPointMetaDataConstructor.newInstance("default", "com.mamiyaotaru.voxelmap.fabricmod.FabricModVoxelMap");
         HashMap<String, List<EntrypointMetadata>> entryPointMetaDataMap = new HashMap<>();
         entryPointMetaDataMap.put("client", new ArrayList<>(List.of((EntrypointMetadata) entryPointMetaDataImplObject)));
         return entryPointMetaDataMap;
