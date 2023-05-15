@@ -16,9 +16,6 @@
 
   "environment": "client",
   "entrypoints": {
-    "client": [
-      "net.burningtnt.voxellatest.entrypoints.ClientEntrypointImpl"
-    ]
   },
   "mixins": [
     "voxellatest.mixins.json"

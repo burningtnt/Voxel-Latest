@@ -1,6 +1,7 @@
 package net.burningtnt.voxellatest.util;
 
 import net.fabricmc.loader.api.FabricLoader;
+import net.fabricmc.loader.api.LanguageAdapter;
 import net.fabricmc.loader.api.Version;
 import net.fabricmc.loader.api.metadata.ContactInformation;
 import net.fabricmc.loader.api.metadata.CustomValue;
@@ -8,6 +9,7 @@ import net.fabricmc.loader.api.metadata.ModEnvironment;
 import net.fabricmc.loader.impl.FabricLoaderImpl;
 import net.fabricmc.loader.impl.ModContainerImpl;
 import net.fabricmc.loader.impl.discovery.ModCandidate;
+import net.fabricmc.loader.impl.entrypoint.EntrypointStorage;
 import net.fabricmc.loader.impl.metadata.ContactInformationImpl;
 import net.fabricmc.loader.impl.metadata.EntrypointMetadata;
 import net.fabricmc.loader.impl.metadata.LoaderModMetadata;
@@ -55,6 +57,12 @@ public class ModInjector {
         return new HashMap<>();
     }
 
+    private static HashMap<String, LanguageAdapter> getLanguageAdapter() {
+        HashMap<String, LanguageAdapter> map = new HashMap<>();
+        map.put("default", DefaultLanguageAdapter.INSTANCE);
+        return map;
+    }
+
     public static void run() {
         try {
             Object authorPersonObject = getAuthorPersonObject();
@@ -62,7 +70,7 @@ public class ModInjector {
             Object iconEntrySingleObject = getIconEntrySingleObject();
             HashMap<String, List<EntrypointMetadata>> entryPointMetaDataMap = getEntryPointMetaDataMap();
             HashMap<String, CustomValue> customValueMap = getCustomValueMap();
-            HashMap<String, String> languageAdapter = new HashMap<>();
+            HashMap<String, LanguageAdapter> languageAdapter = getLanguageAdapter();
             Class<?> v1ModMetadataClass = Class.forName("net.fabricmc.loader.impl.metadata.V1ModMetadata");
             Constructor<?> v1ModMetadataConstructor = v1ModMetadataClass.getDeclaredConstructor(
                     String.class, Version.class, Collection.class, ModEnvironment.class, Map.class, Collection.class,
@@ -91,14 +99,14 @@ public class ModInjector {
 
             ModContainerImpl modContainerImpl = new ModContainerImpl(modCandidateObject);
 
-//            Field entrypointStorageField = FabricLoaderImpl.class.getDeclaredField("entrypointStorage");
-//            entrypointStorageField.setAccessible(true);
-//            EntrypointStorage entrypointStorageMap = (EntrypointStorage) entrypointStorageField.get(FabricLoader.getInstance());
-//            if (entrypointStorageMap != null) {
-//                entrypointStorageMap.add(modContainerImpl, "client", entryPointMetaDataMap.get("client").get(0), languageAdapter);
-//            } else {
-//                LoggerManagerUtil.warn("net.fabricmc.loader.impl.FabricLoaderImpl.modMap is null");
-//            }
+            Field entrypointStorageField = FabricLoaderImpl.class.getDeclaredField("entrypointStorage");
+            entrypointStorageField.setAccessible(true);
+            EntrypointStorage entrypointStorageMap = (EntrypointStorage) entrypointStorageField.get(FabricLoader.getInstance());
+            if (entrypointStorageMap != null) {
+                entrypointStorageMap.add(modContainerImpl, "client", entryPointMetaDataMap.get("client").get(0), languageAdapter);
+            } else {
+                LoggerManagerUtil.warn("net.fabricmc.loader.impl.FabricLoaderImpl.modMap is null");
+            }
 
             Field modMapField = FabricLoaderImpl.class.getDeclaredField("modMap");
             modMapField.setAccessible(true);

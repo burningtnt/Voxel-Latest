@@ -83,8 +83,8 @@ dependencies {
     // Voxel Map
     modCompileOnly files(new File(rootProject.rootDir, "source/source.jar").getAbsolutePath())
 
-    // Fabric API. This is technically optional, but you probably want it anyway.
-    modImplementation "net.fabricmc.fabric-api:fabric-api:${project.fabric_version}"
+    // Fabric API
+    modRuntimeOnly "net.fabricmc.fabric-api:fabric-api:${project.fabric_version}"
 }
 
 processResources {
