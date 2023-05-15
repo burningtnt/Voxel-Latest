@@ -1,6 +1,9 @@
+import net.fabricmc.loom.LoomGradleExtension
+import net.fabricmc.loom.configuration.ide.RunConfigSettings
+
 plugins {
-	id 'fabric-loom' version '0.12-SNAPSHOT'
-	id 'maven-publish'
+    id 'fabric-loom' version '0.12-SNAPSHOT'
+    id 'maven-publish'
 }
 
 sourceCompatibility = JavaVersion.VERSION_17
@@ -11,81 +14,115 @@ version = project.mod_version
 group = project.maven_group
 
 repositories {
-	// Add repositories to retrieve artifacts from in here.
-	// You should only use this when depending on other mods because
-	// Loom adds the essential maven repositories to download Minecraft and libraries from automatically.
-	// See https://docs.gradle.org/current/userguide/declaring_repositories.html
-	// for more information about repositories.
+    // Add repositories to retrieve artifacts from in here.
+    // You should only use this when depending on other mods because
+    // Loom adds the essential maven repositories to download Minecraft and libraries from automatically.
+    // See https://docs.gradle.org/current/userguide/declaring_repositories.html
+    // for more information about repositories.
 
-	maven {
-		url "https://cursemaven.com"
-	}
-	maven {
-		url 'https://www.jitpack.io'
-	}
+    maven {
+        url "https://cursemaven.com"
+    }
+    maven {
+        url 'https://www.jitpack.io'
+    }
 }
 
 remapJar {
-	dependsOn rootProject.remapJar
-	dependsOn rootProject.jar
-	nestedJars.from file("../build/libs/${rootProject.archives_base_name}-${rootProject.mod_version}.jar")
+    dependsOn rootProject.jar
+    nestedJars.from file("../build/libs/${rootProject.archives_base_name}-${rootProject.mod_version}.jar")
 }
 
 afterEvaluate {
-	rootProject.prepareRemapJar.dependsOn.clear()
+    NamedDomainObjectContainer<RunConfigSettings> runConfigSettingsList = ((LoomGradleExtension) extensions.getByName("loom")).getRunConfigs()
+    runConfigSettingsList.create "Minecraft Client", {
+        it.name = "Minecraft Client"
+        it.vmArgs.add "-Dmixin.debug.export=true"
+        it.environment = "client"
+        it.defaultMainClass = "net.fabricmc.devlaunchinjector.Main"
+        it.ideConfigGenerated = true
+    }
+}
+
+ideaSyncTask {
+    doLast {
+        File runConfigurationFile = new File(rootProject.getProjectDir(), ".idea/runConfigurations/Minecraft_Client___${project.name.replace(".", "_")}__${project.name}.xml")
+        try {
+            Node document = new XmlParser().parse(runConfigurationFile)
+            document.findAll {
+                it.name() == "configuration"
+            }.each {
+                it.findAll {
+                    it.name() == "module"
+                }.each {
+                    if (!it.attributes().get("name").startsWith(rootProject.maven_group)) {
+                        it.attributes().put("name", "${rootProject.maven_group}.${it.attributes().get("name")}")
+                    }
+                }
+            }
+            new PrintWriter(new FileWriter(runConfigurationFile)).withCloseable {
+                new XmlNodePrinter(it).print(document)
+            }
+        } catch (Throwable e) {
+            throw new RuntimeException(e)
+        }
+    }
 }
 
 dependencies {
-	// To change the versions see the gradle.properties file
-	minecraft "com.mojang:minecraft:${project.minecraft_version}"
-	mappings "net.fabricmc:yarn:${project.yarn_mappings}:v2"
-	modImplementation "net.fabricmc:fabric-loader:${project.loader_version}"
+    // To change the versions see the gradle.properties file
+    minecraft "com.mojang:minecraft:${project.minecraft_version}"
+    mappings "net.fabricmc:yarn:${project.yarn_mappings}:v2"
+    modImplementation "net.fabricmc:fabric-loader:${project.loader_version}"
 
-	// Voxel Latest
-	implementation rootProject, {
-		transitive = false;
-	}
+    // Voxel Latest
+    implementation rootProject, {
+        transitive = false
+    }
+
+    // Voxel Map
+    modCompileOnly files(new File(rootProject.rootDir, "source/source.jar").getAbsolutePath())
 }
 
 processResources {
-	inputs.property "version", project.version
+    inputs.property "version", project.version
 
-	filesMatching("fabric.mod.json") {
-		expand "version": project.version,"voxelLatestVersion": rootProject.mod_version,"minecraftVersion": project.minecraft_version
-	}
+    filesMatching("fabric.mod.json") {
+        expand "version": project.version,"voxelLatestVersion": rootProject.mod_version,"minecraftVersion": project.minecraft_version
+    }
 }
 
 tasks.withType(JavaCompile).configureEach {
-	// Minecraft 1.18 (1.18-pre2) upwards uses Java 17.
-	it.options.release = 17
+    // Minecraft 1.18 (1.18-pre2) upwards uses Java 17.
+    it.options.release = 17
 }
 
 java {
-	// Loom will automatically attach sourcesJar to a RemapSourcesJar task and to the "build" task
-	// if it is present.
-	// If you remove this line, sources will not be generated.
-	withSourcesJar()
+    // Loom will automatically attach sourcesJar to a RemapSourcesJar task and to the "build" task
+    // if it is present.
+    // If you remove this line, sources will not be generated.
+    withSourcesJar()
 }
 
 jar {
-	from("LICENSE") {
-		rename { "${it}_${project.archivesBaseName}"}
-	}
+    from("LICENSE") {
+        rename { "${it}_${project.archivesBaseName}" }
+    }
 }
 
 // configure the maven publication
 publishing {
-	publications {
-		mavenJava(MavenPublication) {
-			from components.java
-		}
-	}
+    publications {
+        mavenJava(MavenPublication) {
+            from components.java
+        }
+    }
 
-	// See https://docs.gradle.org/current/userguide/publishing_maven.html for information on how to set up publishing.
-	repositories {
-		// Add repositories to publish to here.
-		// Notice: This block does NOT have the same function as the block in the top level.
-		// The repositories here will be used for publishing your artifact, not for
-		// retrieving dependencies.
-	}
+    // See https://docs.gradle.org/current/userguide/publishing_maven.html for information on how to set up publishing.
+    repositories {
+        // Add repositories to publish to here.
+        // Notice: This block does NOT have the same function as the block in the top level.
+        // The repositories here will be used for publishing your artifact, not for
+        // retrieving dependencies.
+    }
 }

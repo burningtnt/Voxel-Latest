@@ -1,3 +1,6 @@
+import net.fabricmc.loom.LoomGradleExtension
+import org.gradle.api.internal.tasks.DefaultTaskInputs
+
 plugins {
     id 'fabric-loom' version '0.12-SNAPSHOT'
     id 'maven-publish'
@@ -25,17 +28,67 @@ repositories {
     }
 }
 
-remapJar {
-}
+gradle.projectsEvaluated {
+    {
+        // Remove broken dependencies
 
-afterEvaluate {
-    File releaseDir = new File(project.rootDir, "release")
-    if (!releaseDir.exists()) {
-        releaseDir.mkdir()
+        Set<Task> removeDependencies = new HashSet<>()
+        for (subProject in subprojects) {
+            removeDependencies.add(subProject.prepareRemapJar)
+        }
+
+        ((Set<DefaultTaskInputs>) rootProject.prepareRemapJar.dependsOn.delegate).removeIf(taskInputs -> removeDependencies.contains(taskInputs.task))
     }
 }
 
-task copyRemapperBuildResult {
+Runnable downloadVoxelmapSource = () -> {
+    File sourceDir = new File(project.rootDir, "source")
+    if (!sourceDir.exists()) {
+        sourceDir.mkdir()
+    }
+
+    File sourceFile = new File(project.rootDir, "source/source.jar")
+    if (!sourceFile.exists()) {
+        String url = "https://mediafilez.forgecdn.net/files/3345/206/fabricmod_VoxelMap-1.10.15_for_1.17.0.jar"
+
+        try {
+            URL tinyUrl = new URL(url)
+            HttpURLConnection request = (HttpURLConnection) tinyUrl.openConnection()
+            request.setReadTimeout(10000)
+            request.connect()
+            try (FileOutputStream fileOutputStream = new FileOutputStream(sourceFile)) {
+                request.getInputStream().transferTo(fileOutputStream)
+            }
+        } catch (IOException e) {
+            RuntimeException r = new RuntimeException(String.format("An Error was thrown while reading data from \"%s\".", url), e)
+            r.printStackTrace()
+            throw r
+        }
+    }
+}
+
+task generateVoxelMapSource {
+    downloadVoxelmapSource.run()
+}
+
+afterEvaluate {
+    {
+        File releaseDir = new File(project.rootDir, "release")
+        if (!releaseDir.exists()) {
+            releaseDir.mkdir()
+        }
+    }
+
+    ((LoomGradleExtension) rootProject.getExtensions().getByName("loom")).getRunConfigs().store.clear()
+
+    tasks.getByName("downloadAssets").configure {
+        doLast {
+            downloadVoxelmapSource.run()
+        }
+    }
+}
+
+task buildAll {
     dependsOn build
 
     for (Project subProject : subprojects) {

@@ -7,6 +7,7 @@ import net.burningtnt.voxellatest.mappers.ASMRemapManager;
 import net.fabricmc.loader.api.FabricLoader;
 import net.fabricmc.loader.impl.launch.FabricLauncherBase;
 import org.objectweb.asm.ClassReader;
+import org.objectweb.asm.Opcodes;
 import org.objectweb.asm.tree.ClassNode;
 
 import java.io.*;
@@ -163,18 +164,6 @@ public class VoxelMapClassRemapUtil {
             return true;
         }
 
-//        long voxelMapJarFileSize;
-//        try (FileInputStream fileInputStream = new FileInputStream(configFile)) {
-//            byte[] data = fileInputStream.readAllBytes();
-////            voxelMapJarFileSize = (((long) data[0] & 0xFFFF_0000_0000_0000L) << 24) | (((long) data[1] & 0x0000_FFFF_0000_0000L) << 16) | (((long) data[2] & 0x0000_0000_FFFF_0000L) << 8) | ((long) data[3] & 0x0000_0000_0000_FFFFL);
-//            voxelMapJarFileSize = Long.parseLong(new String(data));
-//        } catch (IOException e) {
-//            LoggerManagerUtil.fail(String.format("An Error was thrown while reading the data from \"%s\"", configFile.getAbsolutePath()), e);
-//            return true;
-//        }
-//
-//        return voxelMapJarFile.length() != voxelMapJarFileSize;
-
         return !ConfigFileManager.of(configFile).isLatest();
     }
 
@@ -245,18 +234,6 @@ public class VoxelMapClassRemapUtil {
         if (isVoxellatestRemapperDeveloping()) {
             return;
         }
-
-//        File hashFile = new File(voxellatestFolder, "hash");
-//        try (FileOutputStream fileOutputStream = new FileOutputStream(hashFile)) {
-////            long sizeData = voxelMapJarFile.length();
-////            fileOutputStream.write((byte) (sizeData >>> 24 & 0xFF));
-////            fileOutputStream.write((byte) (sizeData >>> 16 & 0xFF));
-////            fileOutputStream.write((byte) (sizeData >>> 8 & 0xFF));
-////            fileOutputStream.write((byte) (sizeData & 0xFF));
-//            fileOutputStream.write(String.valueOf(voxelMapJarFile.length()).getBytes());
-//        } catch (IOException e) {
-//            throw new RuntimeException(String.format("An Error was thron while writing data to \"%s\".", hashFile.getAbsolutePath()), e);
-//        }
 
         ConfigFileManager.writeTo(ModInfoUtil.getVersionConfigFile());
     }
