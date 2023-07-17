@@ -5,11 +5,8 @@ import net.burningtnt.voxellatest.asm.AbstractVoxelMapClassMapper;
 import org.objectweb.asm.Opcodes;
 import org.objectweb.asm.tree.*;
 
-import javax.annotation.Nonnull;
-
 @SuppressWarnings("unused")
 public class VoxelMap extends AbstractVoxelMapClassMapper {
-    @Nonnull
     @Override
     public String matchClass() {
         return "com.mamiyaotaru.voxelmap.VoxelMap";

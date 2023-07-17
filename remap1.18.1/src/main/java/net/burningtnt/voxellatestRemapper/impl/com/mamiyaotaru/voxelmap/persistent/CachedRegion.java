@@ -5,11 +5,8 @@ import net.burningtnt.voxellatest.asm.AbstractVoxelMapClassMapper;
 import org.objectweb.asm.Opcodes;
 import org.objectweb.asm.tree.*;
 
-import javax.annotation.Nonnull;
-
 @SuppressWarnings("unused")
 public class CachedRegion extends AbstractVoxelMapClassMapper {
-    @Nonnull
     @Override
     public String matchClass() {
         return "com.mamiyaotaru.voxelmap.persistent.CachedRegion";
@@ -44,23 +41,6 @@ public class CachedRegion extends AbstractVoxelMapClassMapper {
 
         }
         {
-//            MethodNode methodNode = ASMUtil.getMethodNodeByName("lambda$loadAnvilData$3",classNode);
-//            int index = ASMUtil.getInsnIndexByLineNumber(703,methodNode) + 4;
-//            ((MethodInsnNode) methodNode.instructions.get(index)).desc = "(Ljava/util/function/BooleanSupplier;Z)V";
-//            ASMUtil.insertInsnAtIndex(index,new VarInsnNode(Opcodes.ALOAD,0),methodNode);
-//            index ++;
-//            ASMUtil.insertInsnAtIndex(index,new FieldInsnNode(
-//                    Opcodes.GETFIELD,
-//                    "com/mamiyaotaru/voxelmap/persistent/CachedRegion",
-//                    "executor",
-//                    "Lnet/minecraft/util/thread/ThreadExecutor;"
-//            ),methodNode);
-//            index ++;
-//            ASMUtil.insertInsnAtIndex(index,new MethodInsnNode(
-//                    Opcodes.INVOKEVIRTUAL,
-//                    "net/minecraft/util/thread/ThreadExecutor",
-//                    "isOnThread","()Z"),methodNode
-//            );
         }
     }
 }

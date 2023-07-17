@@ -27,7 +27,10 @@ import java.util.zip.ZipOutputStream;
  * 2 保持网络连接通畅，首次使用 Voxel Latest 时需要从互联网上下载数据并重映射 Voxel Map，这可能需要一段时间。
  * 3 尽情玩吧！
  */
-public class VoxelMapClassRemaManager {
+public final class VoxelMapClassRemaManager {
+    private VoxelMapClassRemaManager() {
+    }
+
     private static boolean hasDone = false;
 
     public static void run() {
@@ -174,7 +177,6 @@ public class VoxelMapClassRemaManager {
         }
         return Files.isDirectory(ModInfo.VOXEL_REMAPPER_MOD.getOrigin().getPaths().get(0));
     }
-
 
     private static void createConfigFile() throws IOException {
         if (isVoxellatestRemapperDeveloping()) {

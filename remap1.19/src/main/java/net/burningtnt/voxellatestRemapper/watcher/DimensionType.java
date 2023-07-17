@@ -7,8 +7,6 @@ import org.objectweb.asm.tree.ClassNode;
 import org.objectweb.asm.tree.MethodInsnNode;
 import org.objectweb.asm.tree.MethodNode;
 
-import javax.annotation.Nonnull;
-
 @SuppressWarnings("unused")
 public class DimensionType extends AbstractVoxelMapInsnWatcher {
     @Override
@@ -35,7 +33,6 @@ public class DimensionType extends AbstractVoxelMapInsnWatcher {
         }
     }
 
-    @Nonnull
     @NotNull
     @Override
     public Shift injectPoint() {

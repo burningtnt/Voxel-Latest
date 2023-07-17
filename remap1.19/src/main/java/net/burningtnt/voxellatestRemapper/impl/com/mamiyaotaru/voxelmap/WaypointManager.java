@@ -6,11 +6,8 @@ import org.jetbrains.annotations.NotNull;
 import org.objectweb.asm.tree.ClassNode;
 import org.objectweb.asm.tree.MethodNode;
 
-import javax.annotation.Nonnull;
-
 @SuppressWarnings("unused")
 public class WaypointManager extends AbstractVoxelMapClassMapper {
-    @Nonnull
     @NotNull
     @Override
     public String matchClass() {

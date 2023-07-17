@@ -2,7 +2,6 @@ package net.burningtnt.voxellatest;
 
 import com.google.gson.JsonParseException;
 import com.google.gson.annotations.SerializedName;
-import net.burningtnt.voxellatest.ModInfo;
 import net.burningtnt.voxellatest.util.Lang;
 import net.burningtnt.voxellatest.util.Logger;
 
@@ -12,7 +11,10 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Objects;
 
-public class ConfigFileManager {
+public final class ConfigFileManager {
+    private ConfigFileManager() {
+    }
+
     private static class Keys {
         public static final String CONFIG_FILE_VERSION = "configFileVersion";
         public static final String VOXEL_LATEST_VERSION = "voxelLatestVersion";
@@ -22,7 +24,7 @@ public class ConfigFileManager {
         public static final int CURRENT_CONFIG_FILE_VERSION = 1;
     }
 
-    public static class Config {
+    public static final class Config {
         private static final Config currentConfig = new Config(
                 Keys.CURRENT_CONFIG_FILE_VERSION,
                 ModInfo.VOXEL_LATEST_MOD.getMetadata().getVersion().getFriendlyString(),

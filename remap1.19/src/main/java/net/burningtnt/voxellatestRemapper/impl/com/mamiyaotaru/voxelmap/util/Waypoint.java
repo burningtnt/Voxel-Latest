@@ -4,11 +4,8 @@ import net.burningtnt.voxellatest.asm.AbstractVoxelMapClassMapper;
 import org.jetbrains.annotations.NotNull;
 import org.objectweb.asm.tree.ClassNode;
 
-import javax.annotation.Nonnull;
-
 @SuppressWarnings("unused")
 public class Waypoint extends AbstractVoxelMapClassMapper {
-    @Nonnull
     @NotNull
     @Override
     public String matchClass() {

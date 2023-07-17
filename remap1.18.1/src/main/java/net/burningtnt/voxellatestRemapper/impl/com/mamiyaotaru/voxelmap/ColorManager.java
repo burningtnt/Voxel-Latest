@@ -5,11 +5,8 @@ import net.burningtnt.voxellatest.asm.AbstractVoxelMapClassMapper;
 import org.objectweb.asm.tree.ClassNode;
 import org.objectweb.asm.tree.MethodNode;
 
-import javax.annotation.Nonnull;
-
 @SuppressWarnings("unused")
 public class ColorManager extends AbstractVoxelMapClassMapper {
-    @Nonnull
     @Override
     public String matchClass() {
         return "com.mamiyaotaru.voxelmap.ColorManager";
@@ -39,13 +36,5 @@ public class ColorManager extends AbstractVoxelMapClassMapper {
             ASMUtil.removeInsnBetween(start, end + 2, methodNode);
             methodNode.tryCatchBlocks.remove(0);
         }
-//        {
-//            MethodNode methodNode = ASMUtil.getMethodNodeByName("getBiomeTint", classNode);
-//            int index = ASMUtil.getInsnIndexByLineNumber(990, methodNode) - 4;
-//            ((MethodInsnNode) methodNode.instructions.get(index - 1)).desc = "(Lnet/minecraft/util/math/BlockPos;)Lnet/minecraft/util/registry/RegistryEntry;";
-//            ASMUtil.insertInsnAtIndex(index, new MethodInsnNode(Opcodes.INVOKEINTERFACE, "net/minecraft/util/registry/RegistryEntry", "value", "()Ljava/lang/Object;", true), methodNode);
-//            index++;
-//            ASMUtil.insertInsnAtIndex(index, new TypeInsnNode(Opcodes.CHECKCAST, "net/minecraft/world/biome/Biome"), methodNode);
-//        }
     }
 }

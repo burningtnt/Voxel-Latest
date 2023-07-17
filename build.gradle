@@ -4,6 +4,7 @@ import org.gradle.api.internal.tasks.DefaultTaskInputs
 plugins {
     id 'fabric-loom' version '0.12-SNAPSHOT'
     id 'maven-publish'
+    id 'checkstyle'
 }
 
 sourceCompatibility = JavaVersion.VERSION_17
@@ -84,6 +85,10 @@ afterEvaluate {
     }
 }
 
+build {
+    dependsOn "checkstyleMain"
+}
+
 task buildAll {
     for (Project subProject : subprojects) {
         dependsOn ":${subProject.name}:build"
@@ -121,9 +126,6 @@ dependencies {
     modImplementation "net.fabricmc:fabric-loader:${project.loader_version}", {
         transitive = false
     }
-
-    // Fabric API. This is technically optional, but you probably want it anyway.
-    // modImplementation "net.fabricmc.fabric-api:fabric-api:${project.fabric_version}"
 }
 
 processResources {

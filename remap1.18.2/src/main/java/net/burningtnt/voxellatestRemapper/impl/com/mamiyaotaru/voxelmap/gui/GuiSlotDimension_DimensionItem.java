@@ -8,11 +8,8 @@ import org.objectweb.asm.tree.JumpInsnNode;
 import org.objectweb.asm.tree.MethodInsnNode;
 import org.objectweb.asm.tree.MethodNode;
 
-import javax.annotation.Nonnull;
-
 @SuppressWarnings("unused")
 public class GuiSlotDimension_DimensionItem extends AbstractVoxelMapClassMapper {
-    @Nonnull
     @Override
     public String matchClass() {
         return "com.mamiyaotaru.voxelmap.gui.GuiSlotDimensions$DimensionItem";

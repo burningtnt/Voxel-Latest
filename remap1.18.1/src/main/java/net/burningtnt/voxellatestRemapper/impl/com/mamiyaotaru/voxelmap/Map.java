@@ -6,10 +6,7 @@ import org.objectweb.asm.tree.ClassNode;
 import org.objectweb.asm.tree.MethodInsnNode;
 import org.objectweb.asm.tree.MethodNode;
 
-import javax.annotation.Nonnull;
-
 public class Map extends AbstractVoxelMapClassMapper {
-    @Nonnull
     @Override
     public String matchClass() {
         return "com.mamiyaotaru.voxelmap.Map";
@@ -17,11 +14,6 @@ public class Map extends AbstractVoxelMapClassMapper {
 
     @Override
     public void remap(ClassNode classNode) {
-//        {
-//            MethodNode methodNode = ASMUtil.getMethodNodeByName("<init>",classNode);
-//            int index = ASMUtil.getInsnIndexByLineNumber(406,methodNode) + 5;
-//            ((FieldInsnNode) methodNode.instructions.get(index)).name = "allKeys";
-//        }
         {
             MethodNode methodNode = ASMUtil.getMethodNodeByName("calculateCurrentLightAndSkyColor",classNode);
             int index = ASMUtil.getInsnIndexByLineNumber(996,methodNode) + 15;

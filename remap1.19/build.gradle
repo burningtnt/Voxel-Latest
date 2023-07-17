@@ -4,6 +4,7 @@ import net.fabricmc.loom.configuration.ide.RunConfigSettings
 plugins {
     id 'fabric-loom' version '0.12-SNAPSHOT'
     id 'maven-publish'
+    id 'checkstyle'
 }
 
 sourceCompatibility = JavaVersion.VERSION_17
@@ -46,6 +47,10 @@ afterEvaluate {
         it.defaultMainClass = "net.fabricmc.devlaunchinjector.Main"
         it.ideConfigGenerated = true
     }
+}
+
+build {
+    dependsOn "checkstyleMain"
 }
 
 ideaSyncTask {

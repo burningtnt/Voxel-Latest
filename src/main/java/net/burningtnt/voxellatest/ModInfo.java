@@ -7,7 +7,10 @@ import net.fabricmc.loader.api.ModContainer;
 
 import java.nio.file.Path;
 
-public class ModInfo {
+public final class ModInfo {
+    private ModInfo() {
+    }
+
     public static final String VOXEL_MAP = "voxelmap";
 
     public static final String VOXEL_LATEST = "voxellatest";

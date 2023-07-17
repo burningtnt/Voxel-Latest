@@ -10,7 +10,7 @@ import java.io.*;
 import java.util.HashMap;
 import java.util.Map;
 
-public class CommonSuperClassManager {
+public final class CommonSuperClassManager {
     private static final Map<String, CommonSuperClassManager> cache = new HashMap<>();
 
     public static void putClass(ClassNode classNode) {
@@ -47,7 +47,7 @@ public class CommonSuperClassManager {
                 // Minecraft 类，不能调用 Class.forName 以避免类加载
                 if (FabricLoader.getInstance().isDevelopmentEnvironment()) {
                     // Minecraft Yarn-named Class
-                    byte[] data = null;
+                    byte[] data;
                     try (InputStream inputStream = Thread.currentThread().getContextClassLoader().getResourceAsStream(className + ".class")) {
                         if (inputStream == null) {
                             throw new NullPointerException(String.format("Cannot read resource from \"%s.class\" because InputStream is null.", className));
@@ -62,7 +62,7 @@ public class CommonSuperClassManager {
                     cache.put(className, new CommonSuperClassManager(className,classNode.superName,(classNode.access & Opcodes.ACC_INTERFACE) == Opcodes.ACC_INTERFACE));
                 } else {
                     // Minecraft Intermediary-named Class
-                    byte[] data = null;
+                    byte[] data;
                     String intermediaryClassName = NamespaceManager.mapClassName(NamespaceManager.MAPPING_INTERMEDIARY,className);
                     try (InputStream inputStream = Thread.currentThread().getContextClassLoader().getResourceAsStream(intermediaryClassName + ".class")) {
                         if (inputStream == null) {
@@ -79,7 +79,7 @@ public class CommonSuperClassManager {
                     cache.put(className, new CommonSuperClassManager(className,yarnSuperClassName,(classNode.access & Opcodes.ACC_INTERFACE) == Opcodes.ACC_INTERFACE));
                 }
             } else {
-                Class<?> classInstance = null;
+                Class<?> classInstance;
                 try {
                     classInstance = Class.forName(className.replace('/', '.'), false, CommonSuperClassManager.class.getClassLoader());
                 } catch (ClassNotFoundException e) {

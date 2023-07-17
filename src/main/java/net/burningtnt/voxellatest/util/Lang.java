@@ -24,7 +24,7 @@ public final class Lang {
 
         if (Files.isDirectory(path)) {
             for (Path sub : Files.list(path).toList()) {
-                delete(path);
+                delete(sub);
             }
         }
 

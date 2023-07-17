@@ -7,11 +7,8 @@ import org.objectweb.asm.tree.ClassNode;
 import org.objectweb.asm.tree.MethodNode;
 import org.objectweb.asm.tree.TypeInsnNode;
 
-import javax.annotation.Nonnull;
-
 @SuppressWarnings("unused")
 public class GuiSlotWaypoints extends AbstractVoxelMapClassMapper {
-    @Nonnull
     @Override
     public String matchClass() {
         return "com.mamiyaotaru.voxelmap.gui.GuiSlotWaypoints";

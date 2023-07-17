@@ -17,9 +17,12 @@ import java.nio.file.Path;
 import java.util.Collections;
 import java.util.function.Supplier;
 
-public class NamespaceManager {
-    public static String MAPPING_INTERMEDIARY = "intermediary";
-    public static String MAPPING_YARN = "named";
+public final class NamespaceManager {
+    private NamespaceManager() {
+    }
+
+    public static final String MAPPING_INTERMEDIARY = "intermediary";
+    public static final String MAPPING_YARN = "named";
 
     private static MappingResolver yarnMappingResolver = null;
     private static MappingResolver intermediaryMappingResolver = null;
@@ -72,7 +75,7 @@ public class NamespaceManager {
 
         Logger.info("Getting minecraftintermediary file");
 
-        Path currentMinecraftFile = FabricLoader.getInstance().getModContainer(ModInfo.MINECRAFT).get().getOrigin().getPaths().get(0);
+        Path currentMinecraftFile = ModInfo.MINECRAFT_MOD.getOrigin().getPaths().get(0);
 
         if (FabricLoader.getInstance().isDevelopmentEnvironment()) {
             Logger.info("Remapping: Prepare TinyRemapper in developing environment.");

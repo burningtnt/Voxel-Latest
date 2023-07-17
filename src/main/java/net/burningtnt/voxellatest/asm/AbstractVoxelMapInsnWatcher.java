@@ -1,9 +1,6 @@
 package net.burningtnt.voxellatest.asm;
 
 import org.objectweb.asm.tree.ClassNode;
-import org.objectweb.asm.tree.MethodNode;
-
-import javax.annotation.Nonnull;
 
 public abstract class AbstractVoxelMapInsnWatcher {
     public enum Shift {
@@ -25,6 +22,5 @@ public abstract class AbstractVoxelMapInsnWatcher {
 
     public abstract void remap(ClassNode classNode);
 
-    @Nonnull
     public abstract Shift injectPoint();
 }

@@ -38,6 +38,7 @@ public class MixinPluginEntrypointImpl implements IMixinConfigPlugin {
                     System.err.println("[Voxel Latest] A fatal error happened while using Unsafe package to crash JVM. Use infinity loop instead.");
                     e3.printStackTrace(System.err);
 
+                    //noinspection InfiniteLoopStatement
                     while (true) {
                     }
                 }

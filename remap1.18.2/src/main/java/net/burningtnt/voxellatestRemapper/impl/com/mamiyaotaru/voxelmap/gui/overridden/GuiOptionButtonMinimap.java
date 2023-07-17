@@ -5,11 +5,8 @@ import net.burningtnt.voxellatest.asm.AbstractVoxelMapClassMapper;
 import org.objectweb.asm.tree.ClassNode;
 import org.objectweb.asm.tree.MethodNode;
 
-import javax.annotation.Nonnull;
-
 @SuppressWarnings("unused")
 public class GuiOptionButtonMinimap extends AbstractVoxelMapClassMapper {
-    @Nonnull
     @Override
     public String matchClass() {
         return "com.mamiyaotaru.voxelmap.gui.overridden.GuiOptionButtonMinimap";

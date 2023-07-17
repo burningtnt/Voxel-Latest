@@ -21,7 +21,10 @@ import java.lang.reflect.InvocationTargetException;
 import java.util.*;
 import java.util.function.ToIntFunction;
 
-public class ASMRemapManager {
+public final class ASMRemapManager {
+    private ASMRemapManager() {
+    }
+
     private static final Map<String, List<AbstractVoxelMapClassMapper>> remappers = new HashMap<>();
 
     private static final List<AbstractVoxelMapInsnWatcher> beforeWatchers = new ArrayList<>();
@@ -70,7 +73,7 @@ public class ASMRemapManager {
                 throw new RuntimeException(new ClassCastException(String.format("Cannot cast class of the custom value \"voxellatest.remapperConfigClasses[%s]\" in voxellatest-remapper mod to Class %s and Class %s", classPath, AbstractVoxelMapClassMapper.class.getName(), AbstractVoxelMapInsnWatcher.class.getName())));
             }
 
-            Constructor<?> constructor = null;
+            Constructor<?> constructor;
             try {
                 constructor = configClass.getConstructor();
             } catch (NoSuchMethodException e) {
@@ -150,7 +153,7 @@ public class ASMRemapManager {
             if (classAnnotationNode.desc.equals("Lorg/spongepowered/asm/mixin/Mixin;")) {
                 JsonObject currentClassRefMapJsonRoot = new JsonObject();
                 Object ownerObject = ASMUtil.getPropertyByName("value", classAnnotationNode);
-                String owner = null;
+                String owner;
                 if (ownerObject instanceof String) {
                     owner = (String) ownerObject;
                 } else {
@@ -232,7 +235,7 @@ public class ASMRemapManager {
             while (insnNode != null) {
                 if (insnNode instanceof MethodInsnNode methodInsnNode) {
                     if (methodInsnNode.owner.startsWith("net/minecraft")) {
-                        ClassNode invokeClassNode = null;
+                        ClassNode invokeClassNode;
                         if (FabricLoader.getInstance().isDevelopmentEnvironment()) {
                             invokeClassNode = ASMUtil.getClassNode(methodInsnNode.owner);
                         } else {
@@ -243,7 +246,7 @@ public class ASMRemapManager {
                         if (methodInsnNode.itf) {
                             methodInsnNode.setOpcode(Opcodes.INVOKEINTERFACE);
                         } else {
-                            MethodNode invokeMethodNode = null;
+                            MethodNode invokeMethodNode;
                             methodInsnNode.name = fixMethodRef(methodInsnNode.owner, methodInsnNode.name, methodInsnNode.desc);
                             if (FabricLoader.getInstance().isDevelopmentEnvironment()) {
                                 invokeMethodNode = ASMUtil.getMethodNodeByName(methodInsnNode.name + methodInsnNode.desc, invokeClassNode);

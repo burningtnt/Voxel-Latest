@@ -24,7 +24,10 @@ import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.util.*;
 
-public class Injector {
+public final class Injector {
+    private Injector() {
+    }
+
     private static ArrayList<Object> getAuthorPersonObject() throws ClassNotFoundException, NoSuchMethodException, InvocationTargetException, InstantiationException, IllegalAccessException {
         Class<?> authorPersonClass = Class.forName("net.fabricmc.loader.impl.metadata.SimplePerson");
         Constructor<?> authorPersonConstructor = authorPersonClass.getDeclaredConstructor(String.class);

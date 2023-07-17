@@ -2,8 +2,6 @@ package net.burningtnt.voxellatest.asm;
 
 import org.objectweb.asm.tree.ClassNode;
 
-import javax.annotation.Nonnull;
-
 /**
  * An abstract class used for remap the classes of VoxelMap.
  * You need to override method {@link AbstractVoxelMapClassMapper#matchClass()}
@@ -20,7 +18,6 @@ public abstract class AbstractVoxelMapClassMapper {
      * An abstract method to mark which class should 'I' remap.
      * @return The class name (in dot form) 'I' want to remap.
      */
-    @Nonnull
     public abstract String matchClass();
 
     /**

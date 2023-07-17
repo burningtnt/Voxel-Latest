@@ -6,14 +6,15 @@ import org.objectweb.asm.ClassReader;
 import org.objectweb.asm.tree.*;
 import org.spongepowered.asm.mixin.injection.struct.TargetNotSupportedException;
 
-import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.List;
 
-@SuppressWarnings("unused")
-public class ASMUtil {
+public final class ASMUtil {
+    private ASMUtil() {
+    }
+
     public static FieldNode getFieldNodeByName(String name, ClassNode classNode) {
         for (FieldNode fieldNode : classNode.fields) {
             if (fieldNode.name.equals(name)) {
@@ -170,7 +171,6 @@ public class ASMUtil {
         return getClassNode(classNode.superName);
     }
 
-    @Nonnull
     public static List<ClassNode> getInterfaceClassNode(ClassNode classNode) {
         ArrayList<ClassNode> arrayList = new ArrayList<>();
         for (String interfaceName : classNode.interfaces) {
@@ -182,7 +182,7 @@ public class ASMUtil {
     public static ClassNode getClassNode(String className) {
         className = className.replace('.','/');
         if (FabricLoader.getInstance().isDevelopmentEnvironment()) {
-            byte[] data = null;
+            byte[] data;
             try (InputStream inputStream = Thread.currentThread().getContextClassLoader().getResourceAsStream(className + ".class")) {
                 if (inputStream == null) {
                     throw new NullPointerException(String.format("Cannot read resource from \"%s.class\" because InputStream is null.", className));
@@ -197,7 +197,7 @@ public class ASMUtil {
             return classNode;
         } else {
             String intermediaryClassName = NamespaceManager.mapClassName(NamespaceManager.MAPPING_INTERMEDIARY, className);
-            byte[] data = null;
+            byte[] data;
             try (InputStream inputStream = Thread.currentThread().getContextClassLoader().getResourceAsStream(intermediaryClassName + ".class")) {
                 if (inputStream == null) {
                     throw new NullPointerException(String.format("Cannot read resource from \"%s.class\" because InputStream is null.", intermediaryClassName));

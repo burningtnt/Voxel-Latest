@@ -6,7 +6,10 @@ import org.slf4j.LoggerFactory;
 import java.io.PrintWriter;
 import java.io.StringWriter;
 
-public class Logger {
+public final class Logger {
+    private Logger() {
+    }
+
     private static final org.slf4j.Logger LOGGER = LoggerFactory.getLogger("Voxel Latest");
 
     public static void info(String str) {

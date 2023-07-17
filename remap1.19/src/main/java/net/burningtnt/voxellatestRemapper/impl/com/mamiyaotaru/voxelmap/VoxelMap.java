@@ -6,11 +6,8 @@ import org.jetbrains.annotations.NotNull;
 import org.objectweb.asm.Opcodes;
 import org.objectweb.asm.tree.*;
 
-import javax.annotation.Nonnull;
-
 @SuppressWarnings("unused")
 public class VoxelMap extends AbstractVoxelMapClassMapper {
-    @Nonnull
     @Override
     public @NotNull String matchClass() {
         return "com.mamiyaotaru.voxelmap.VoxelMap";
