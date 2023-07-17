@@ -1,12 +1,11 @@
-package net.burningtnt.voxellatest.mappers;
+package net.burningtnt.voxellatest.asm;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonPrimitive;
-import net.burningtnt.voxellatest.util.CommonSuperClassUtil;
-import net.burningtnt.voxellatest.util.LoggerManagerUtil;
-import net.burningtnt.voxellatest.util.NamespaceUtil;
+import net.burningtnt.voxellatest.util.Logger;
+import net.burningtnt.voxellatest.NamespaceManager;
 import net.fabricmc.loader.api.FabricLoader;
 import net.fabricmc.loader.api.ModContainer;
 import net.fabricmc.loader.api.metadata.CustomValue;
@@ -68,7 +67,7 @@ public class ASMRemapManager {
             boolean isClassMapper = isExtendsFrom(configClass, AbstractVoxelMapClassMapper.class);
             boolean isInsnWatcher = !isClassMapper && isExtendsFrom(configClass, AbstractVoxelMapInsnWatcher.class);
             if (!isClassMapper && !isInsnWatcher) {
-                throw new RuntimeException(new ClassCastException(String.format("Cannot cast Class of the custom value \"voxellatest.remapperConfigClasses[%s]\" in voxellatest-remapper mod to Class %s and Class %s", classPath, AbstractVoxelMapClassMapper.class.getName(), AbstractVoxelMapInsnWatcher.class.getName())));
+                throw new RuntimeException(new ClassCastException(String.format("Cannot cast class of the custom value \"voxellatest.remapperConfigClasses[%s]\" in voxellatest-remapper mod to Class %s and Class %s", classPath, AbstractVoxelMapClassMapper.class.getName(), AbstractVoxelMapInsnWatcher.class.getName())));
             }
 
             Constructor<?> constructor = null;
@@ -121,7 +120,7 @@ public class ASMRemapManager {
             instance.remap(classNode);
         }
 
-        List<AbstractVoxelMapClassMapper> currentRemappers = remappers.get(classNode.name.replace('/', '.').replace('$', '.'));
+        List<AbstractVoxelMapClassMapper> currentRemappers = remappers.get(classNode.name.replace('/', '.'));
         if (currentRemappers != null) {
             for (AbstractVoxelMapClassMapper instance : currentRemappers) {
                 instance.remap(classNode);
@@ -165,16 +164,16 @@ public class ASMRemapManager {
                             try {
                                 Object object = ASMUtil.getPropertyByName("method", annotationNode);
                                 if (object instanceof String target) {
-                                    String targetRefMap = NamespaceUtil.mapDesc(NamespaceUtil.MAPPING_INTERMEDIARY, target.substring(target.indexOf('(')));
+                                    String targetRefMap = NamespaceManager.mapDesc(NamespaceManager.MAPPING_INTERMEDIARY, target.substring(target.indexOf('(')));
                                     targetRefMap = fixMethodRef(owner, target.substring(0, target.indexOf('(')), target.substring(target.indexOf('('))) + targetRefMap;
-                                    LoggerManagerUtil.info(String.format("Create Mixin Reference Map from \"%s\" to \"%s\"", target, targetRefMap));
+                                    Logger.info(String.format("Create Mixin Reference Map from \"%s\" to \"%s\"", target, targetRefMap));
                                     currentClassRefMapJsonRoot.add(target, new JsonPrimitive(targetRefMap));
                                 } else {
                                     ArrayList<String> methods = (ArrayList<String>) object;
                                     for (String target : methods) {
-                                        String targetRefMap = NamespaceUtil.mapDesc(NamespaceUtil.MAPPING_INTERMEDIARY, target.substring(target.indexOf('(')));
+                                        String targetRefMap = NamespaceManager.mapDesc(NamespaceManager.MAPPING_INTERMEDIARY, target.substring(target.indexOf('(')));
                                         targetRefMap = fixMethodRef(owner, target.substring(0, target.indexOf('(')), target.substring(target.indexOf('('))) + targetRefMap;
-                                        LoggerManagerUtil.info(String.format("Create Mixin Reference Map from \"%s\" to \"%s\"", target, targetRefMap));
+                                        Logger.info(String.format("Create Mixin Reference Map from \"%s\" to \"%s\"", target, targetRefMap));
                                         currentClassRefMapJsonRoot.add(target, new JsonPrimitive(targetRefMap));
                                     }
                                 }
@@ -185,9 +184,9 @@ public class ASMRemapManager {
                                 if (object instanceof AnnotationNode atAnnotationNode) {
                                     try {
                                         String target = (String) ASMUtil.getPropertyByName("target", atAnnotationNode);
-                                        String targetRefMap = NamespaceUtil.mapDesc(NamespaceUtil.MAPPING_INTERMEDIARY, target.substring(target.indexOf('(')));
-                                        targetRefMap = "L" + NamespaceUtil.mapClassName(NamespaceUtil.MAPPING_INTERMEDIARY, target.substring(1, target.indexOf(';'))) + ";" + fixMethodRef(target.substring(1, target.indexOf(';')), target.substring(target.indexOf(';') + 1, target.indexOf('(')), target.substring(target.indexOf('('))) + targetRefMap;
-                                        LoggerManagerUtil.info(String.format("Create Mixin Reference Map from \"%s\" to \"%s\"", target, targetRefMap));
+                                        String targetRefMap = NamespaceManager.mapDesc(NamespaceManager.MAPPING_INTERMEDIARY, target.substring(target.indexOf('(')));
+                                        targetRefMap = "L" + NamespaceManager.mapClassName(NamespaceManager.MAPPING_INTERMEDIARY, target.substring(1, target.indexOf(';'))) + ";" + fixMethodRef(target.substring(1, target.indexOf(';')), target.substring(target.indexOf(';') + 1, target.indexOf('(')), target.substring(target.indexOf('('))) + targetRefMap;
+                                        Logger.info(String.format("Create Mixin Reference Map from \"%s\" to \"%s\"", target, targetRefMap));
                                         currentClassRefMapJsonRoot.add(target, new JsonPrimitive(targetRefMap));
                                     } catch (TargetNotSupportedException ignored) {
                                     }
@@ -197,9 +196,9 @@ public class ASMRemapManager {
                                     for (AnnotationNode atAnnotationNode : atAnnotationNodes) {
                                         try {
                                             String target = (String) ASMUtil.getPropertyByName("target", atAnnotationNode);
-                                            String targetRefMap = NamespaceUtil.mapDesc(NamespaceUtil.MAPPING_INTERMEDIARY, target.substring(target.indexOf('(')));
-                                            targetRefMap = "L" + NamespaceUtil.mapClassName(NamespaceUtil.MAPPING_INTERMEDIARY, target.substring(1, target.indexOf(';'))) + ";" + fixMethodRef(target.substring(1, target.indexOf(';')), target.substring(target.indexOf(';') + 1, target.indexOf('(')), target.substring(target.indexOf('('))) + targetRefMap;
-                                            LoggerManagerUtil.info(String.format("Create Mixin Reference Map from \"%s\" to \"%s\"", target, targetRefMap));
+                                            String targetRefMap = NamespaceManager.mapDesc(NamespaceManager.MAPPING_INTERMEDIARY, target.substring(target.indexOf('(')));
+                                            targetRefMap = "L" + NamespaceManager.mapClassName(NamespaceManager.MAPPING_INTERMEDIARY, target.substring(1, target.indexOf(';'))) + ";" + fixMethodRef(target.substring(1, target.indexOf(';')), target.substring(target.indexOf(';') + 1, target.indexOf('(')), target.substring(target.indexOf('('))) + targetRefMap;
+                                            Logger.info(String.format("Create Mixin Reference Map from \"%s\" to \"%s\"", target, targetRefMap));
                                             currentClassRefMapJsonRoot.add(target, new JsonPrimitive(targetRefMap));
                                         } catch (TargetNotSupportedException ignored) {
                                         }
@@ -237,7 +236,7 @@ public class ASMRemapManager {
                         if (FabricLoader.getInstance().isDevelopmentEnvironment()) {
                             invokeClassNode = ASMUtil.getClassNode(methodInsnNode.owner);
                         } else {
-                            invokeClassNode = ASMUtil.getClassNode(NamespaceUtil.mapClassName(NamespaceUtil.MAPPING_INTERMEDIARY, methodInsnNode.owner));
+                            invokeClassNode = ASMUtil.getClassNode(NamespaceManager.mapClassName(NamespaceManager.MAPPING_INTERMEDIARY, methodInsnNode.owner));
                         }
                         methodInsnNode.itf = (invokeClassNode.access & Opcodes.ACC_INTERFACE) == Opcodes.ACC_INTERFACE;
 
@@ -250,12 +249,12 @@ public class ASMRemapManager {
                                 invokeMethodNode = ASMUtil.getMethodNodeByName(methodInsnNode.name + methodInsnNode.desc, invokeClassNode);
                             } else {
                                 invokeMethodNode = ASMUtil.getMethodNodeByName(
-                                        NamespaceUtil.mapMethodName(
-                                                NamespaceUtil.MAPPING_INTERMEDIARY,
+                                        NamespaceManager.mapMethodName(
+                                                NamespaceManager.MAPPING_INTERMEDIARY,
                                                 methodInsnNode.owner.replace('/', '.'),
                                                 methodInsnNode.name,
                                                 methodInsnNode.desc
-                                        ) + NamespaceUtil.mapDesc(NamespaceUtil.MAPPING_INTERMEDIARY, methodInsnNode.desc),
+                                        ) + NamespaceManager.mapDesc(NamespaceManager.MAPPING_INTERMEDIARY, methodInsnNode.desc),
                                         invokeClassNode
                                 );
                             }
@@ -292,27 +291,27 @@ public class ASMRemapManager {
 
         if (FabricLoader.getInstance().isDevelopmentEnvironment()) {
             // owner: yarn, name: intermediary, desc: yarn
-            String intermediaryOwner = NamespaceUtil.mapClassName(NamespaceUtil.MAPPING_INTERMEDIARY, owner);
-            String intermediaryDesc = NamespaceUtil.mapDesc(NamespaceUtil.MAPPING_INTERMEDIARY, desc);
-            String yarnName = NamespaceUtil.mapMethodName(NamespaceUtil.MAPPING_YARN, intermediaryOwner, name, intermediaryDesc);
+            String intermediaryOwner = NamespaceManager.mapClassName(NamespaceManager.MAPPING_INTERMEDIARY, owner);
+            String intermediaryDesc = NamespaceManager.mapDesc(NamespaceManager.MAPPING_INTERMEDIARY, desc);
+            String yarnName = NamespaceManager.mapMethodName(NamespaceManager.MAPPING_YARN, intermediaryOwner, name, intermediaryDesc);
             if (!name.equals(yarnName)) {
                 return yarnName;
             }
         } else {
             // owner: intermediary, name: yarn, desc: intermediary
-            String yarnOwner = NamespaceUtil.mapClassName(NamespaceUtil.MAPPING_YARN, owner);
-            String yarnDesc = NamespaceUtil.mapDesc(NamespaceUtil.MAPPING_YARN, desc);
-            String intermediaryName = NamespaceUtil.mapMethodName(NamespaceUtil.MAPPING_INTERMEDIARY, yarnOwner, name, yarnDesc);
+            String yarnOwner = NamespaceManager.mapClassName(NamespaceManager.MAPPING_YARN, owner);
+            String yarnDesc = NamespaceManager.mapDesc(NamespaceManager.MAPPING_YARN, desc);
+            String intermediaryName = NamespaceManager.mapMethodName(NamespaceManager.MAPPING_INTERMEDIARY, yarnOwner, name, yarnDesc);
             if (!name.equals(intermediaryName)) {
                 return intermediaryName;
             }
         }
 
-        ClassNode superClassNode = ASMUtil.getSuperClassNode(ASMUtil.getClassNode(NamespaceUtil.mapClassName(NamespaceUtil.getCurrentNamespace(), owner)));
+        ClassNode superClassNode = ASMUtil.getSuperClassNode(ASMUtil.getClassNode(NamespaceManager.mapClassName(NamespaceManager.getCurrentNamespace(), owner)));
         if (superClassNode != null) {
             String yarnSuperMethodName = fixMethodRef(superClassNode.name, name, desc);
             if (!yarnSuperMethodName.equals(name)) {
-                LoggerManagerUtil.warn(String.format(
+                Logger.warn(String.format(
                         "Unmapped reference to \"%s#%s%s\" found. Redirect to \"%s#%s%s\"",
                         owner, name, desc, superClassNode.name, yarnSuperMethodName, desc
                 ));
@@ -320,11 +319,11 @@ public class ASMRemapManager {
             }
         }
 
-        List<ClassNode> interfaceClassNodeList = ASMUtil.getInterfaceClassNode(ASMUtil.getClassNode(NamespaceUtil.mapClassName(NamespaceUtil.getCurrentNamespace(), owner)));
+        List<ClassNode> interfaceClassNodeList = ASMUtil.getInterfaceClassNode(ASMUtil.getClassNode(NamespaceManager.mapClassName(NamespaceManager.getCurrentNamespace(), owner)));
         for (ClassNode interfaceClassNode : interfaceClassNodeList) {
             String yarnInterfaceMethodName = fixMethodRef(interfaceClassNode.name, name, desc);
             if (!yarnInterfaceMethodName.equals(name)) {
-                LoggerManagerUtil.warn(String.format(
+                Logger.warn(String.format(
                         "Unmapped reference to \"%s#%s%s\" found. Redirect to \"%s#%s%s\"",
                         owner, name, desc, interfaceClassNode.name, yarnInterfaceMethodName, desc
                 ));
@@ -341,7 +340,7 @@ public class ASMRemapManager {
         }
 
         protected String getCommonSuperClass(final String type1, final String type2) {
-            return CommonSuperClassUtil.getCommonSuperClass(type1, type2);
+            return CommonSuperClassManager.getCommonSuperClass(type1, type2);
         }
     }
 }

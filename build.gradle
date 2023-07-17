@@ -41,34 +41,32 @@ gradle.projectsEvaluated {
     }
 }
 
-Runnable downloadVoxelmapSource = () -> {
-    File sourceDir = new File(project.rootDir, "source")
-    if (!sourceDir.exists()) {
-        sourceDir.mkdir()
-    }
+task generateVoxelMapSource {
+    doLast {
+        File sourceDir = new File(project.rootDir, "source")
+        if (!sourceDir.exists()) {
+            sourceDir.mkdir()
+        }
 
-    File sourceFile = new File(project.rootDir, "source/source.jar")
-    if (!sourceFile.exists()) {
-        String url = "https://mediafilez.forgecdn.net/files/3345/206/fabricmod_VoxelMap-1.10.15_for_1.17.0.jar"
+        File sourceFile = new File(project.rootDir, "source/source.jar")
+        if (!sourceFile.exists()) {
+            String url = "https://mediafilez.forgecdn.net/files/3345/206/fabricmod_VoxelMap-1.10.15_for_1.17.0.jar"
 
-        try {
-            URL tinyUrl = new URL(url)
-            HttpURLConnection request = (HttpURLConnection) tinyUrl.openConnection()
-            request.setReadTimeout(10000)
-            request.connect()
-            try (FileOutputStream fileOutputStream = new FileOutputStream(sourceFile)) {
-                request.getInputStream().transferTo(fileOutputStream)
+            try {
+                URL tinyUrl = new URL(url)
+                HttpURLConnection request = (HttpURLConnection) tinyUrl.openConnection()
+                request.setReadTimeout(10000)
+                request.connect()
+                try (FileOutputStream fileOutputStream = new FileOutputStream(sourceFile)) {
+                    request.getInputStream().transferTo(fileOutputStream)
+                }
+            } catch (IOException e) {
+                RuntimeException r = new RuntimeException(String.format("An Error was thrown while reading data from \"%s\".", url), e)
+                r.printStackTrace()
+                throw r
             }
-        } catch (IOException e) {
-            RuntimeException r = new RuntimeException(String.format("An Error was thrown while reading data from \"%s\".", url), e)
-            r.printStackTrace()
-            throw r
         }
     }
-}
-
-task generateVoxelMapSource {
-    downloadVoxelmapSource.run()
 }
 
 afterEvaluate {
@@ -82,9 +80,7 @@ afterEvaluate {
     ((LoomGradleExtension) rootProject.getExtensions().getByName("loom")).getRunConfigs().store.clear()
 
     tasks.getByName("downloadAssets").configure {
-        doLast {
-            downloadVoxelmapSource.run()
-        }
+        dependsOn "generateVoxelMapSource"
     }
 }
 
@@ -94,19 +90,21 @@ task buildAll {
     }
     dependsOn "build"
 
-    for (Project subProject : subprojects) {
-        File sourceFile = new File(subProject.buildDir, "libs/${subProject.archives_base_name}-${subProject.mod_version}.jar")
-        File targetFile = new File(project.rootDir, "release/${project.archives_base_name}-${subProject.mod_version}-${subProject.minecraft_version}.jar")
+    doLast {
+        for (Project subProject : subprojects) {
+            File sourceFile = new File(subProject.buildDir, "libs/${subProject.archives_base_name}-${subProject.mod_version}.jar")
+            File targetFile = new File(project.rootDir, "release/${project.archives_base_name}-${subProject.mod_version}-${subProject.minecraft_version}.jar")
 
-        if (sourceFile.exists()) {
-            if (!targetFile.delete()) {
-                throw new SecurityException("Failed to delete file ${targetFile.getAbsolutePath()}.")
-            }
-            try (
-                    FileInputStream fileInputStream = new FileInputStream(sourceFile)
-                    FileOutputStream fileOutputStream = new FileOutputStream(targetFile)
-            ) {
-                fileInputStream.transferTo(fileOutputStream)
+            if (sourceFile.exists()) {
+                if (!targetFile.delete()) {
+                    throw new SecurityException("Failed to delete file ${targetFile.getAbsolutePath()}.")
+                }
+                try (
+                        FileInputStream fileInputStream = new FileInputStream(sourceFile)
+                        FileOutputStream fileOutputStream = new FileOutputStream(targetFile)
+                ) {
+                    fileInputStream.transferTo(fileOutputStream)
+                }
             }
         }
     }
@@ -115,17 +113,17 @@ task buildAll {
 dependencies {
     // To change the versions see the gradle.properties file
     minecraft "com.mojang:minecraft:${project.minecraft_version}", {
-        transitive = false;
+        transitive = false
     }
     mappings "net.fabricmc:yarn:${project.yarn_mappings}:v2", {
-        transitive = false;
+        transitive = false
     }
     modImplementation "net.fabricmc:fabric-loader:${project.loader_version}", {
-        transitive = false;
+        transitive = false
     }
 
     // Fabric API. This is technically optional, but you probably want it anyway.
-    modImplementation "net.fabricmc.fabric-api:fabric-api:${project.fabric_version}"
+    // modImplementation "net.fabricmc.fabric-api:fabric-api:${project.fabric_version}"
 }
 
 processResources {

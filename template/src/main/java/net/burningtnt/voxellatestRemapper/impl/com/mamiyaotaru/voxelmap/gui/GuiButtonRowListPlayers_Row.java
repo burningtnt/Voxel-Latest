@@ -10,7 +10,7 @@ import org.objectweb.asm.tree.MethodNode;
 public class GuiButtonRowListPlayers_Row extends AbstractVoxelMapClassMapper {
     @Override
     public String matchClass() {
-        return "com.mamiyaotaru.voxelmap.gui.GuiButtonRowListPlayers.Row";
+        return "com.mamiyaotaru.voxelmap.gui.GuiButtonRowListPlayers$Row";
     }
 
     @Override

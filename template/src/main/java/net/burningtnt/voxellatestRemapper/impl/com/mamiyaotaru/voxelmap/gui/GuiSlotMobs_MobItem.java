@@ -10,7 +10,7 @@ import org.objectweb.asm.tree.MethodNode;
 public class GuiSlotMobs_MobItem extends AbstractVoxelMapClassMapper {
     @Override
     public String matchClass() {
-        return "com.mamiyaotaru.voxelmap.gui.GuiSlotMobs.MobItem";
+        return "com.mamiyaotaru.voxelmap.gui.GuiSlotMobs$MobItem";
     }
 
     @Override

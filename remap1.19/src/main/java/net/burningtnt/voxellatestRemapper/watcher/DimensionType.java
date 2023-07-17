@@ -1,11 +1,13 @@
 package net.burningtnt.voxellatestRemapper.watcher;
 
-import net.burningtnt.voxellatest.mappers.AbstractVoxelMapInsnWatcher;
+import net.burningtnt.voxellatest.asm.AbstractVoxelMapInsnWatcher;
 import org.jetbrains.annotations.NotNull;
 import org.objectweb.asm.tree.AbstractInsnNode;
 import org.objectweb.asm.tree.ClassNode;
 import org.objectweb.asm.tree.MethodInsnNode;
 import org.objectweb.asm.tree.MethodNode;
+
+import javax.annotation.Nonnull;
 
 @SuppressWarnings("unused")
 public class DimensionType extends AbstractVoxelMapInsnWatcher {
@@ -33,6 +35,7 @@ public class DimensionType extends AbstractVoxelMapInsnWatcher {
         }
     }
 
+    @Nonnull
     @NotNull
     @Override
     public Shift injectPoint() {

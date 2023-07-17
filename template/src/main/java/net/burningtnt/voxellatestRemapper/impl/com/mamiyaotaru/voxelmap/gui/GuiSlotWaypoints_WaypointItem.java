@@ -10,7 +10,7 @@ import org.objectweb.asm.tree.MethodNode;
 public class GuiSlotWaypoints_WaypointItem extends AbstractVoxelMapClassMapper {
     @Override
     public String matchClass() {
-        return "com.mamiyaotaru.voxelmap.gui.GuiSlotWaypoints.WaypointItem";
+        return "com.mamiyaotaru.voxelmap.gui.GuiSlotWaypoints$WaypointItem";
     }
 
     @Override

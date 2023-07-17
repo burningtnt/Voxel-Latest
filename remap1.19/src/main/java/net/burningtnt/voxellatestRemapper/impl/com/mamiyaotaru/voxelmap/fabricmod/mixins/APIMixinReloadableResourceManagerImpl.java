@@ -1,13 +1,16 @@
 package net.burningtnt.voxellatestRemapper.impl.com.mamiyaotaru.voxelmap.fabricmod.mixins;
 
-import net.burningtnt.voxellatest.mappers.ASMUtil;
-import net.burningtnt.voxellatest.mappers.AbstractVoxelMapClassMapper;
+import net.burningtnt.voxellatest.asm.ASMUtil;
+import net.burningtnt.voxellatest.asm.AbstractVoxelMapClassMapper;
 import org.objectweb.asm.tree.ClassNode;
 import org.objectweb.asm.tree.FieldNode;
 import org.objectweb.asm.tree.MethodNode;
 
+import javax.annotation.Nonnull;
+
 @SuppressWarnings("unused")
 public class APIMixinReloadableResourceManagerImpl extends AbstractVoxelMapClassMapper {
+    @Nonnull
     @Override
     public String matchClass() {
         return "com.mamiyaotaru.voxelmap.fabricmod.mixins.APIMixinReloadableResourceManagerImpl";

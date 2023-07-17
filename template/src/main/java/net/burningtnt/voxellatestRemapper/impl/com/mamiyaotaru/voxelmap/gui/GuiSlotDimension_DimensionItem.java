@@ -12,7 +12,7 @@ import org.objectweb.asm.tree.MethodNode;
 public class GuiSlotDimension_DimensionItem extends AbstractVoxelMapClassMapper {
     @Override
     public String matchClass() {
-        return "com.mamiyaotaru.voxelmap.gui.GuiSlotDimensions.DimensionItem";
+        return "com.mamiyaotaru.voxelmap.gui.GuiSlotDimensions$DimensionItem";
     }
 
     @Override

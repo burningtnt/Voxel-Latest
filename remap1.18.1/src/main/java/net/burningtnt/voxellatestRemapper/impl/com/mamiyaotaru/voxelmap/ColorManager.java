@@ -1,15 +1,15 @@
 package net.burningtnt.voxellatestRemapper.impl.com.mamiyaotaru.voxelmap;
 
-import net.burningtnt.voxellatest.mappers.ASMUtil;
-import net.burningtnt.voxellatest.mappers.AbstractVoxelMapClassMapper;
-import org.objectweb.asm.Opcodes;
+import net.burningtnt.voxellatest.asm.ASMUtil;
+import net.burningtnt.voxellatest.asm.AbstractVoxelMapClassMapper;
 import org.objectweb.asm.tree.ClassNode;
-import org.objectweb.asm.tree.MethodInsnNode;
 import org.objectweb.asm.tree.MethodNode;
-import org.objectweb.asm.tree.TypeInsnNode;
+
+import javax.annotation.Nonnull;
 
 @SuppressWarnings("unused")
 public class ColorManager extends AbstractVoxelMapClassMapper {
+    @Nonnull
     @Override
     public String matchClass() {
         return "com.mamiyaotaru.voxelmap.ColorManager";

@@ -1,5 +1,6 @@
-package net.burningtnt.voxellatest.util;
+package net.burningtnt.voxellatest;
 
+import net.burningtnt.voxellatest.util.Logger;
 import net.fabricmc.loader.api.FabricLoader;
 import net.fabricmc.loader.api.MappingResolver;
 import net.fabricmc.mapping.tree.TinyMappingFactory;
@@ -16,14 +17,14 @@ import java.nio.file.Path;
 import java.util.Collections;
 import java.util.function.Supplier;
 
-public class NamespaceUtil {
+public class NamespaceManager {
     public static String MAPPING_INTERMEDIARY = "intermediary";
     public static String MAPPING_YARN = "named";
 
     private static MappingResolver yarnMappingResolver = null;
     private static MappingResolver intermediaryMappingResolver = null;
-    private static File minecraftIntermediaryFile = null;
-    private static File minecraftYarnFile = null;
+    private static Path minecraftIntermediaryFile = null;
+    private static Path minecraftYarnFile = null;
 
     public static String getCurrentNamespace() {
         if (FabricLoader.getInstance().isDevelopmentEnvironment()) {
@@ -69,50 +70,50 @@ public class NamespaceUtil {
             throw new RuntimeException(e);
         }
 
-        LoggerManagerUtil.info("Getting minecraftintermediary file");
+        Logger.info("Getting minecraftintermediary file");
 
-        File currentMinecraftFile = FabricLoader.getInstance().getModContainer(ModInfoUtil.MINECRAFT).get().getOrigin().getPaths().get(0).toFile();
+        Path currentMinecraftFile = FabricLoader.getInstance().getModContainer(ModInfo.MINECRAFT).get().getOrigin().getPaths().get(0);
 
         if (FabricLoader.getInstance().isDevelopmentEnvironment()) {
-            LoggerManagerUtil.info("Remapping: Prepare TinyRemapper in developing environment.");
+            Logger.info("Remapping: Prepare TinyRemapper in developing environment.");
             minecraftYarnFile = currentMinecraftFile;
-            minecraftIntermediaryFile = new File(ModInfoUtil.getModDir(), "minecraft-intermediary.jar");
+            minecraftIntermediaryFile = ModInfo.MOD_DIR.resolve("minecraft-intermediary.jar");
 
-            run(NamespaceUtil.MAPPING_YARN, NamespaceUtil.MAPPING_INTERMEDIARY, currentMinecraftFile, minecraftIntermediaryFile, null);
+            run(NamespaceManager.MAPPING_YARN, NamespaceManager.MAPPING_INTERMEDIARY, currentMinecraftFile, minecraftIntermediaryFile, null);
         } else {
-            LoggerManagerUtil.info("Remapping: Prepare TinyRemapper in normal environment.");
-            minecraftYarnFile = new File(ModInfoUtil.getModDir(), "minecraft-yarn.jar");
+            Logger.info("Remapping: Prepare TinyRemapper in normal environment.");
+            minecraftYarnFile = ModInfo.MOD_DIR.resolve("minecraft-yarn.jar");
             minecraftIntermediaryFile = currentMinecraftFile;
 
-            run(NamespaceUtil.MAPPING_INTERMEDIARY, NamespaceUtil.MAPPING_YARN, currentMinecraftFile, minecraftYarnFile, null);
+            run(NamespaceManager.MAPPING_INTERMEDIARY, NamespaceManager.MAPPING_YARN, currentMinecraftFile, minecraftYarnFile, null);
         }
     }
 
     public static MappingResolver getYarnMappingResolver() {
         if (yarnMappingResolver == null) {
-            throw new RuntimeException("net.burningtnt.voxellatest.util.NamespaceUtil.yarnMappingResolver has not init.");
+            throw new RuntimeException("net.burningtnt.voxellatest.NamespaceManager.yarnMappingResolver has not init.");
         }
         return yarnMappingResolver;
     }
 
     public static MappingResolver getIntermediaryMappingResolver() {
         if (intermediaryMappingResolver == null) {
-            throw new RuntimeException("net.burningtnt.voxellatest.util.NamespaceUtil.intermediaryMappingResolver has not init.");
+            throw new RuntimeException("net.burningtnt.voxellatest.NamespaceManager.intermediaryMappingResolver has not init.");
         }
         return intermediaryMappingResolver;
     }
 
-    public static File getMinecraftIntermediaryFile() {
+    public static Path getMinecraftIntermediaryFile() {
         return minecraftIntermediaryFile;
     }
 
-    public static File getMinecraftYarnFile() {
+    public static Path getMinecraftYarnFile() {
         return minecraftYarnFile;
     }
 
     public static String mapClassName(String targetNamespace, String className) {
 
-        String res = NamespaceUtil.getYarnMappingResolver().unmapClassName(
+        String res = NamespaceManager.getYarnMappingResolver().unmapClassName(
                 targetNamespace,
                 className.replace('/', '.')
         ).replace('.', '/');
@@ -120,7 +121,7 @@ public class NamespaceUtil {
             return res;
         }
 
-        res = NamespaceUtil.getIntermediaryMappingResolver().unmapClassName(
+        res = NamespaceManager.getIntermediaryMappingResolver().unmapClassName(
                 targetNamespace,
                 className.replace('/', '.')
         ).replace('.', '/');
@@ -129,16 +130,16 @@ public class NamespaceUtil {
     }
 
     public static String mapMethodName(String targetNamespace, String owner, String name, String desc) {
-        String res = NamespaceUtil.getYarnMappingResolver().mapMethodName(
-                targetNamespace.equals(NamespaceUtil.MAPPING_YARN) ? NamespaceUtil.MAPPING_INTERMEDIARY : NamespaceUtil.MAPPING_YARN,
+        String res = NamespaceManager.getYarnMappingResolver().mapMethodName(
+                targetNamespace.equals(NamespaceManager.MAPPING_YARN) ? NamespaceManager.MAPPING_INTERMEDIARY : NamespaceManager.MAPPING_YARN,
                 owner.replace('/', '.'), name, desc
         );
         if (!res.equals(name)) {
             return res;
         }
 
-        res = NamespaceUtil.getIntermediaryMappingResolver().mapMethodName(
-                targetNamespace.equals(NamespaceUtil.MAPPING_YARN) ? NamespaceUtil.MAPPING_INTERMEDIARY : NamespaceUtil.MAPPING_YARN,
+        res = NamespaceManager.getIntermediaryMappingResolver().mapMethodName(
+                targetNamespace.equals(NamespaceManager.MAPPING_YARN) ? NamespaceManager.MAPPING_INTERMEDIARY : NamespaceManager.MAPPING_YARN,
                 owner.replace('/', '.'), name, desc
         );
 
@@ -173,16 +174,18 @@ public class NamespaceUtil {
         return desc;
     }
 
-    public static void run(String fromName, String toName, File fromFile, File toFile) {
-        run(fromName, toName, fromFile, toFile, fromName.equals(MAPPING_YARN) ? getMinecraftYarnFile() : getMinecraftIntermediaryFile());
+    public static void run(String fromName, String toName, Path fromPath, Path toPath) {
+        run(fromName, toName, fromPath, toPath, fromName.equals(MAPPING_YARN) ? getMinecraftYarnFile() : getMinecraftIntermediaryFile());
     }
 
-    public static void run(String fromName, String toName, File fromFile, File toFile, File sourceFile) {
-        LoggerManagerUtil.info(String.format(
+    public static void run(String fromName, String toName, Path fromPath, Path toPath, Path sourceFile) {
+        Logger.info(String.format(
                 "Remap file from namespace \"%s\" to namespace \"%s\" with tiny-remapper from path \"%s\" to path \"%s\" with Tiny Remapper",
-                fromName, toName, fromFile.getAbsolutePath(), toFile.getAbsolutePath()
+                fromName, toName, fromPath, toPath
         ));
-        TinyRemapper.Builder builder = TinyRemapper.newRemapper()
+
+        Path[] sourcePath = sourceFile != null ? new Path[]{sourceFile} : new Path[]{};
+        TinyRemapper remapper = TinyRemapper.newRemapper()
                 .withMappings(TinyUtils.createTinyMappingProvider(getMappingBufferedReader(), fromName, toName))
                 .ignoreFieldDesc(false)
                 .withForcedPropagation(Collections.emptySet())
@@ -197,15 +200,13 @@ public class NamespaceUtil {
                 .skipLocalVariableMapping(false)
                 .renameInvalidLocals(false)
                 .invalidLvNamePattern(null)
-                .threads(-1);
-        TinyRemapper remapper = builder.build();
+                .threads(-1)
+                .build();
 
-        Path[] sourcePath = sourceFile != null ? new Path[]{sourceFile.toPath()} : new Path[]{};
+        try (OutputConsumerPath outputConsumer = new OutputConsumerPath.Builder(toPath).build()) {
+            outputConsumer.addNonClassFiles(fromPath, NonClassCopyMode.FIX_META_INF, remapper);
 
-        try (OutputConsumerPath outputConsumer = new OutputConsumerPath.Builder(toFile.toPath()).build()) {
-            outputConsumer.addNonClassFiles(fromFile.toPath(), NonClassCopyMode.FIX_META_INF, remapper);
-
-            remapper.readInputs(fromFile.toPath());
+            remapper.readInputs(fromPath);
             remapper.readClassPath(sourcePath);
 
             remapper.apply(outputConsumer);

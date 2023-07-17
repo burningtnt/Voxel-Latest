@@ -1,12 +1,15 @@
 package net.burningtnt.voxellatestRemapper.impl.com.mamiyaotaru.voxelmap.gui.overridden;
 
-import net.burningtnt.voxellatest.mappers.ASMUtil;
-import net.burningtnt.voxellatest.mappers.AbstractVoxelMapClassMapper;
+import net.burningtnt.voxellatest.asm.ASMUtil;
+import net.burningtnt.voxellatest.asm.AbstractVoxelMapClassMapper;
 import org.objectweb.asm.tree.ClassNode;
 import org.objectweb.asm.tree.MethodNode;
 
+import javax.annotation.Nonnull;
+
 @SuppressWarnings("unused")
 public class GuiOptionButtonMinimap extends AbstractVoxelMapClassMapper {
+    @Nonnull
     @Override
     public String matchClass() {
         return "com.mamiyaotaru.voxelmap.gui.overridden.GuiOptionButtonMinimap";

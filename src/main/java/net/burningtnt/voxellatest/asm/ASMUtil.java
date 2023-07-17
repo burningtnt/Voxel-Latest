@@ -1,6 +1,6 @@
-package net.burningtnt.voxellatest.mappers;
+package net.burningtnt.voxellatest.asm;
 
-import net.burningtnt.voxellatest.util.NamespaceUtil;
+import net.burningtnt.voxellatest.NamespaceManager;
 import net.fabricmc.loader.api.FabricLoader;
 import org.objectweb.asm.ClassReader;
 import org.objectweb.asm.tree.*;
@@ -134,15 +134,6 @@ public class ASMUtil {
                 }
             }
         }
-//        AbstractInsnNode abstractInsnNode = methodNode.instructions.get(0);
-//        int index = 0;
-//        while (abstractInsnNode.getNext() != null) {
-//            if (abstractInsnNode instanceof LineNumberNode lineNumberNode && lineNumberNode.line == lineNumber) {
-//                return index;
-//            }
-//            abstractInsnNode = abstractInsnNode.getNext();
-//            index ++;
-//        }
         throw new TargetNotSupportedException(String.format("No such LineNumberNode \"%d\" in method \"%s\".", lineNumber, methodNode.name + methodNode.desc));
     }
 
@@ -158,13 +149,6 @@ public class ASMUtil {
     }
 
     public static void removeInsnSinceIndex(int index, int size, MethodNode methodNode) {
-//        AbstractInsnNode abstractInsnNode = methodNode.instructions.get(index);
-//        AbstractInsnNode abstractInsnNodeNext = abstractInsnNode.getNext();
-//        for (int i = 0; i < size; i++) {
-//            methodNode.instructions.remove(abstractInsnNode);
-//            abstractInsnNode = abstractInsnNodeNext;
-//            abstractInsnNodeNext = abstractInsnNode.getNext();
-//        }
         for (int i = 0; i < size; i++) {
             methodNode.instructions.remove(methodNode.instructions.get(index));
         }
@@ -212,7 +196,7 @@ public class ASMUtil {
             classReader.accept(classNode, 0);
             return classNode;
         } else {
-            String intermediaryClassName = NamespaceUtil.mapClassName(NamespaceUtil.MAPPING_INTERMEDIARY, className);
+            String intermediaryClassName = NamespaceManager.mapClassName(NamespaceManager.MAPPING_INTERMEDIARY, className);
             byte[] data = null;
             try (InputStream inputStream = Thread.currentThread().getContextClassLoader().getResourceAsStream(intermediaryClassName + ".class")) {
                 if (inputStream == null) {

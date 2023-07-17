@@ -1,5 +1,6 @@
-package net.burningtnt.voxellatest.util;
+package net.burningtnt.voxellatest;
 
+import net.burningtnt.voxellatest.util.Logger;
 import net.fabricmc.loader.api.FabricLoader;
 import net.fabricmc.loader.api.LanguageAdapter;
 import net.fabricmc.loader.api.Version;
@@ -10,6 +11,7 @@ import net.fabricmc.loader.impl.FabricLoaderImpl;
 import net.fabricmc.loader.impl.ModContainerImpl;
 import net.fabricmc.loader.impl.discovery.ModCandidate;
 import net.fabricmc.loader.impl.entrypoint.EntrypointStorage;
+import net.fabricmc.loader.impl.launch.FabricLauncherBase;
 import net.fabricmc.loader.impl.metadata.ContactInformationImpl;
 import net.fabricmc.loader.impl.metadata.EntrypointMetadata;
 import net.fabricmc.loader.impl.metadata.LoaderModMetadata;
@@ -22,12 +24,15 @@ import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.util.*;
 
-public class ModInjector {
-    private static Object getAuthorPersonObject() throws ClassNotFoundException, NoSuchMethodException, InvocationTargetException, InstantiationException, IllegalAccessException {
+public class Injector {
+    private static ArrayList<Object> getAuthorPersonObject() throws ClassNotFoundException, NoSuchMethodException, InvocationTargetException, InstantiationException, IllegalAccessException {
         Class<?> authorPersonClass = Class.forName("net.fabricmc.loader.impl.metadata.SimplePerson");
         Constructor<?> authorPersonConstructor = authorPersonClass.getDeclaredConstructor(String.class);
         authorPersonConstructor.setAccessible(true);
-        return authorPersonConstructor.newInstance("MamiyaOtaru");
+        return new ArrayList<>(List.of(
+                authorPersonConstructor.newInstance("MamiyaOtaru"),
+                authorPersonConstructor.newInstance("Burning_TNT (Injected by Voxel Latest)")
+        ));
     }
 
     private static HashMap<String, String> getContactInformationMap() {
@@ -63,9 +68,12 @@ public class ModInjector {
         return map;
     }
 
-    public static void run() {
+    public static void injectToFabricLoader() {
+        Logger.info(String.format("Add \"%s\" to Fabric", ModInfo.VOXEL_MAP_REMAPPING_DONE));
+        FabricLauncherBase.getLauncher().addToClassPath(ModInfo.VOXEL_MAP_REMAPPING_DONE);
+
         try {
-            Object authorPersonObject = getAuthorPersonObject();
+            ArrayList<Object> authorPersonObject = getAuthorPersonObject();
             HashMap<String, String> contactInformationHashMap = getContactInformationMap();
             Object iconEntrySingleObject = getIconEntrySingleObject();
             HashMap<String, List<EntrypointMetadata>> entryPointMetaDataMap = getEntryPointMetaDataMap();
@@ -80,18 +88,18 @@ public class ModInjector {
             );
             v1ModMetadataConstructor.setAccessible(true);
             Object v1ModMetadataObject = v1ModMetadataConstructor.newInstance(
-                    ModInfoUtil.VOXEL_MAP, new StringVersion(String.format("1.10.15+%s", ModInfoUtil.VOXEL_LATEST)), new ArrayList<String>(), ModEnvironment.CLIENT, entryPointMetaDataMap, new ArrayList<NestedJarEntry>(),
-                    new ArrayList<>(), null, new ArrayList<>(), false, "VoxelMap", "Minimap and world map",
-                    new ArrayList<>(List.of(authorPersonObject)), new ArrayList<>(), new ContactInformationImpl(contactInformationHashMap), new ArrayList<>(),
+                    ModInfo.VOXEL_MAP, new StringVersion(String.format("1.10.15+%s-%s+%s-%s", ModInfo.VOXEL_LATEST, ModInfo.VOXEL_LATEST_MOD.getMetadata().getVersion().getFriendlyString(), ModInfo.VOXEL_REMAPPER, ModInfo.VOXEL_REMAPPER_MOD.getMetadata().getVersion().getFriendlyString())), new ArrayList<String>(), ModEnvironment.CLIENT, entryPointMetaDataMap, new ArrayList<NestedJarEntry>(),
+                    new ArrayList<>(), null, new ArrayList<>(), false, "VoxelMap (Upgraded by Voxel Latest)", "Minimap and world map",
+                    authorPersonObject, new ArrayList<>(), new ContactInformationImpl(contactInformationHashMap), new ArrayList<>(),
                     iconEntrySingleObject, languageAdapter, customValueMap
             );
 
             Constructor<ModCandidate> modCandidateConstructor = ModCandidate.class.getDeclaredConstructor(List.class, String.class, long.class, LoaderModMetadata.class, boolean.class, Collection.class);
             modCandidateConstructor.setAccessible(true);
             ModCandidate modCandidateObject = modCandidateConstructor.newInstance(
-                    new ArrayList<>(List.of(VoxelMapClassRemapUtil.getRemappedJarFile().toPath())),
-                    VoxelMapClassRemapUtil.getRemappedJarFile().getAbsolutePath(),
-                    (long) VoxelMapClassRemapUtil.getRemappedJarFile().hashCode(),
+                    new ArrayList<>(List.of(ModInfo.VOXEL_MAP_REMAPPING_DONE)),
+                    ModInfo.VOXEL_MAP_REMAPPING_DONE.toString(),
+                    (long) ModInfo.VOXEL_MAP_REMAPPING_DONE.hashCode(),
                     v1ModMetadataObject,
                     false,
                     new ArrayList<>()
@@ -105,16 +113,16 @@ public class ModInjector {
             if (entrypointStorageMap != null) {
                 entrypointStorageMap.add(modContainerImpl, "client", entryPointMetaDataMap.get("client").get(0), languageAdapter);
             } else {
-                LoggerManagerUtil.warn("net.fabricmc.loader.impl.FabricLoaderImpl.modMap is null");
+                Logger.warn("net.fabricmc.loader.impl.FabricLoaderImpl.modMap is null");
             }
 
             Field modMapField = FabricLoaderImpl.class.getDeclaredField("modMap");
             modMapField.setAccessible(true);
             Map<String, ModContainerImpl> modMap = (Map<String, ModContainerImpl>) modMapField.get(FabricLoader.getInstance());
             if (modMap != null) {
-                modMap.put(ModInfoUtil.VOXEL_MAP, modContainerImpl);
+                modMap.put(ModInfo.VOXEL_MAP, modContainerImpl);
             } else {
-                LoggerManagerUtil.warn("net.fabricmc.loader.impl.FabricLoaderImpl.modMap is null");
+                Logger.warn("net.fabricmc.loader.impl.FabricLoaderImpl.modMap is null");
             }
 
             Field modsField = FabricLoaderImpl.class.getDeclaredField("mods");
@@ -123,7 +131,7 @@ public class ModInjector {
             if (mods != null) {
                 mods.add(modContainerImpl);
             } else {
-                LoggerManagerUtil.warn("net.fabricmc.loader.impl.FabricLoaderImpl.mods is null");
+                Logger.warn("net.fabricmc.loader.impl.FabricLoaderImpl.mods is null");
             }
         } catch (Throwable e) {
             throw new RuntimeException("An Error was thrown while adding VoxelMap to Fabric.", e);

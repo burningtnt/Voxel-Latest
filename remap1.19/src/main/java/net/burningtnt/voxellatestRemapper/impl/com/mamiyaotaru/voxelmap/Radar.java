@@ -1,17 +1,16 @@
 package net.burningtnt.voxellatestRemapper.impl.com.mamiyaotaru.voxelmap;
 
-import net.burningtnt.voxellatest.mappers.ASMUtil;
-import net.burningtnt.voxellatest.mappers.AbstractVoxelMapClassMapper;
-import net.minecraft.client.MinecraftClient;
-import net.minecraft.client.render.entity.feature.VillagerResourceMetadata;
-import net.minecraft.resource.metadata.ResourceMetadata;
-import net.minecraft.resource.metadata.ResourceMetadataReader;
+import net.burningtnt.voxellatest.asm.ASMUtil;
+import net.burningtnt.voxellatest.asm.AbstractVoxelMapClassMapper;
 import org.jetbrains.annotations.NotNull;
 import org.objectweb.asm.Opcodes;
 import org.objectweb.asm.tree.*;
 
+import javax.annotation.Nonnull;
+
 @SuppressWarnings("unused")
 public class Radar extends AbstractVoxelMapClassMapper {
+    @Nonnull
     @Override
     @NotNull
     public String matchClass() {

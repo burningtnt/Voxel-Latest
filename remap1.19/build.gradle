@@ -26,6 +26,10 @@ repositories {
     maven {
         url 'https://www.jitpack.io'
     }
+    flatDir {
+        name 'voxelmap-source'
+        dirs rootProject.file('source')
+    }
 }
 
 remapJar {
@@ -81,10 +85,7 @@ dependencies {
     }
 
     // Voxel Map
-    modCompileOnly files(new File(rootProject.rootDir, "source/source.jar").getAbsolutePath())
-
-    // Fabric API
-    modRuntimeOnly "net.fabricmc.fabric-api:fabric-api:${project.fabric_version}"
+    modCompileOnly "voxelmap-source:source:"
 }
 
 processResources {

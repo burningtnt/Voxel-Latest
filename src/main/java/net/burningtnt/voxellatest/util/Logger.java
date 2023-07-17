@@ -1,14 +1,13 @@
 package net.burningtnt.voxellatest.util;
 
 import org.apache.commons.io.IOUtils;
-import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.PrintWriter;
 import java.io.StringWriter;
 
-public class LoggerManagerUtil {
-    private static final Logger LOGGER = LoggerFactory.getLogger("Voxel Latest");
+public class Logger {
+    private static final org.slf4j.Logger LOGGER = LoggerFactory.getLogger("Voxel Latest");
 
     public static void info(String str) {
         LOGGER.info("[Voxel Latest] {}.", str);

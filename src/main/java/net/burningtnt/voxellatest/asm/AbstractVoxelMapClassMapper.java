@@ -1,4 +1,4 @@
-package net.burningtnt.voxellatest.mappers;
+package net.burningtnt.voxellatest.asm;
 
 import org.objectweb.asm.tree.ClassNode;
 
@@ -6,7 +6,7 @@ import javax.annotation.Nonnull;
 
 /**
  * An abstract class used for remap the classes of VoxelMap.
- * You need to override method {@link net.burningtnt.voxellatest.mappers.AbstractVoxelMapClassMapper#matchClass()}
+ * You need to override method {@link AbstractVoxelMapClassMapper#matchClass()}
  * and method {@link AbstractVoxelMapClassMapper#remap(ClassNode)} to modify the ASM.
  * What's more, you have to register the class name (in dot form) in fabric.mod.json
  * of voxellatest-remapper like

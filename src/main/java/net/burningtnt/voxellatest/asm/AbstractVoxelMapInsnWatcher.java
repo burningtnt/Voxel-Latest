@@ -1,4 +1,4 @@
-package net.burningtnt.voxellatest.mappers;
+package net.burningtnt.voxellatest.asm;
 
 import org.objectweb.asm.tree.ClassNode;
 import org.objectweb.asm.tree.MethodNode;
