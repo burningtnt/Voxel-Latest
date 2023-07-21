@@ -141,6 +141,7 @@ public final class ASMRemapManager {
         return classWriter.toByteArray();
     }
 
+    @SuppressWarnings("unchecked")
     private static void createRefMap(ClassNode classNode) {
         List<AnnotationNode> annotationNodeList = new ArrayList<>();
         if (classNode.visibleAnnotations != null) {

@@ -71,6 +71,7 @@ public final class Injector {
         return map;
     }
 
+    @SuppressWarnings("unchecked")
     public static void injectToFabricLoader() {
         Logger.info(String.format("Add \"%s\" to Fabric", ModInfo.VOXEL_MAP_REMAPPING_DONE));
         FabricLauncherBase.getLauncher().addToClassPath(ModInfo.VOXEL_MAP_REMAPPING_DONE);

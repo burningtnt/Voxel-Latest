@@ -34,7 +34,7 @@ repositories {
 }
 
 remapJar {
-    dependsOn rootProject.jar
+    dependsOn rootProject.remapJar
     nestedJars.from file("../build/libs/${rootProject.archives_base_name}-${rootProject.mod_version}.jar")
 }
 

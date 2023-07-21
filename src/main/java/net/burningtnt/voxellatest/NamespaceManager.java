@@ -49,6 +49,7 @@ public final class NamespaceManager {
         intermediaryMappingResolver = null;
     }
 
+    @SuppressWarnings("unchecked")
     public static void init() {
         try {
             Class<? extends MappingResolver> mappingResolverImpl = (Class<? extends MappingResolver>) Class.forName("net.fabricmc.loader.impl.MappingResolverImpl");
