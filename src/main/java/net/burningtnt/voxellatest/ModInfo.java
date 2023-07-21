@@ -19,13 +19,11 @@ public final class ModInfo {
 
     public static final String MINECRAFT = "minecraft";
 
-    public static final ModContainer VOXEL_MAP_MOD = FabricLoader.getInstance().getModContainer(ModInfo.VOXEL_LATEST).orElseThrow(() -> new IllegalStateException("VoxelLatest must be loaded"));
-
     public static final ModContainer VOXEL_LATEST_MOD = FabricLoader.getInstance().getModContainer(ModInfo.VOXEL_LATEST).orElseThrow(() -> new IllegalStateException("VoxelLatest must be loaded"));
 
-    public static final ModContainer VOXEL_REMAPPER_MOD = FabricLoader.getInstance().getModContainer(ModInfo.VOXEL_LATEST).orElseThrow(() -> new IllegalStateException("VoxelLatest must be loaded"));
+    public static final ModContainer VOXEL_REMAPPER_MOD = FabricLoader.getInstance().getModContainer(ModInfo.VOXEL_REMAPPER).orElseThrow(() -> new IllegalStateException("VoxelRemapper must be loaded"));
 
-    public static final ModContainer MINECRAFT_MOD = FabricLoader.getInstance().getModContainer(ModInfo.VOXEL_LATEST).orElseThrow(() -> new IllegalStateException("VoxelLatest must be loaded"));
+    public static final ModContainer MINECRAFT_MOD = FabricLoader.getInstance().getModContainer(ModInfo.MINECRAFT).orElseThrow(() -> new IllegalStateException("Minecraft must be loaded"));
 
     public static final Path MOD_DIR = FabricLoader.getInstance().getGameDir().resolve("voxellatest").toAbsolutePath();
 

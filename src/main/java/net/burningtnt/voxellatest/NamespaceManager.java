@@ -50,7 +50,7 @@ public final class NamespaceManager {
     }
 
     @SuppressWarnings("unchecked")
-    public static void init() {
+    public static void init() throws IOException {
         try {
             Class<? extends MappingResolver> mappingResolverImpl = (Class<? extends MappingResolver>) Class.forName("net.fabricmc.loader.impl.MappingResolverImpl");
             Constructor<? extends MappingResolver> constructor = mappingResolverImpl.getDeclaredConstructor(Supplier.class, String.class);
@@ -178,11 +178,11 @@ public final class NamespaceManager {
         return desc;
     }
 
-    public static void remapJar(String fromName, String toName, Path fromPath, Path toPath) {
+    public static void remapJar(String fromName, String toName, Path fromPath, Path toPath) throws IOException {
         remapJar(fromName, toName, fromPath, toPath, fromName.equals(MAPPING_YARN) ? getMinecraftYarnFile() : getMinecraftIntermediaryFile());
     }
 
-    public static void remapJar(String fromName, String toName, Path fromPath, Path toPath, Path sourceFile) {
+    public static void remapJar(String fromName, String toName, Path fromPath, Path toPath, Path sourceFile) throws IOException {
         Logger.info(String.format(
                 "Remap file from namespace \"%s\" to namespace \"%s\" with tiny-remapper from path \"%s\" to path \"%s\" with Tiny Remapper",
                 fromName, toName, fromPath, toPath
@@ -214,8 +214,6 @@ public final class NamespaceManager {
             remapper.readClassPath(sourcePath);
 
             remapper.apply(outputConsumer);
-        } catch (IOException e) {
-            throw new RuntimeException(e);
         } finally {
             remapper.finish();
         }

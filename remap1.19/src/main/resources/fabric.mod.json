@@ -18,8 +18,7 @@
     "fabricloader": ">=0.14.6",
     "minecraft": "=${minecraftVersion}",
     "java": ">=17",
-    "voxellatest": "=${voxelLatestVersion}",
-    "fabric": "*"
+    "voxellatest": "=${voxelLatestVersion}"
   },
   "custom": {
     "voxellatest.remapperConfigClasses": [

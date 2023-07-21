@@ -16,12 +16,12 @@ public abstract class AbstractVoxelMapClassMapper {
 
     /**
      * An abstract method to mark which class should 'I' remap.
-     * @return The class name (in dot form) 'I' want to remap.
+     * @return The binary class name 'I' want to remap.
      */
     public abstract String matchClass();
 
     /**
-     * An abstract method to remap the class marked in {@link AbstractVoxelMapClassMapper#matchClass()}
+     * An abstract method to remap the class registered in {@link AbstractVoxelMapClassMapper#matchClass()}
      */
     public abstract void remap(ClassNode classNode);
 
