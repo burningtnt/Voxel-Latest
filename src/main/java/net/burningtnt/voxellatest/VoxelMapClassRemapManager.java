@@ -27,8 +27,8 @@ import java.util.zip.ZipOutputStream;
  * 2 保持网络连接通畅，首次使用 Voxel Latest 时需要从互联网上下载数据并重映射 Voxel Map，这可能需要一段时间。
  * 3 尽情玩吧！
  */
-public final class VoxelMapClassRemaManager {
-    private VoxelMapClassRemaManager() {
+public final class VoxelMapClassRemapManager {
+    private VoxelMapClassRemapManager() {
     }
 
     private static boolean hasDone = false;
@@ -77,17 +77,53 @@ public final class VoxelMapClassRemaManager {
         Logger.info("Remapping: All Finish");
     }
 
-    private static void downloadVoxelMapRawJarFile(Path path) throws IOException {
-        String url = "https://mediafilez.forgecdn.net/files/3345/206/fabricmod_VoxelMap-1.10.15_for_1.17.0.jar";
+    private static void mapVoxelMapJarFile() throws IOException {
+        if (!shouldUpdateVoxelMapJarFileMapCache()) {
+            Logger.info("Find remapped.jar. Skip Remapping");
+            return;
+        }
 
-        Logger.info(String.format("Downloading voxelmap from \"%s\"", url));
+        Logger.info("Remapping voxelmap.jar. This may cost a huge amount of time. Please wait patiently");
 
-        URL tinyUrl = new URL(url);
-        HttpURLConnection request = (HttpURLConnection) tinyUrl.openConnection();
-        request.setReadTimeout(10000);
-        request.connect();
-        try (OutputStream outputStream = Files.newOutputStream(path)) {
-            request.getInputStream().transferTo(outputStream);
+        if (!Files.isDirectory(ModInfo.MOD_DIR)) {
+            Lang.delete(ModInfo.MOD_DIR);
+            Files.createDirectory(ModInfo.MOD_DIR);
+        }
+
+        // ModInfo.getVoxelMapRawFile() -> ModInfo.getVoxelMapIntermediaryRemappingFile() -> ModInfo.getVoxelMapASMRemappingFile(), ModInfo.getVoxelMapRemappedFile()
+
+        NamespaceManager.init();
+
+        if (!Files.isRegularFile(ModInfo.VOXEL_MAP_RAW_FILE)) {
+            Lang.delete(ModInfo.VOXEL_MAP_RAW_FILE);
+            downloadVoxelMapRawJarFile(ModInfo.VOXEL_MAP_RAW_FILE);
+        }
+
+        // Remapping: 1.17 intermediary -> current yarn
+        Logger.info(String.format("Remapping: %s %s -> %s %s", ModInfo.MINECRAFT_MOD.getMetadata().getVersion().getFriendlyString(), NamespaceManager.MAPPING_INTERMEDIARY, ModInfo.MINECRAFT_MOD.getMetadata().getVersion().getFriendlyString(), NamespaceManager.MAPPING_YARN));
+        Lang.delete(ModInfo.VOXEL_MAP_REMAPPING_YARN_DOWN);
+        NamespaceManager.remapJar(NamespaceManager.MAPPING_INTERMEDIARY, NamespaceManager.MAPPING_YARN, ModInfo.VOXEL_MAP_RAW_FILE, ModInfo.VOXEL_MAP_REMAPPING_YARN_DOWN);
+
+        // Remapping: ASM Remapping
+        Logger.info("Remapping: ASM Remapping");
+        Lang.delete(ModInfo.VOXEL_MAP_REMAPPING_ASM_DONE);
+        remapByASM(ModInfo.VOXEL_MAP_REMAPPING_YARN_DOWN, ModInfo.VOXEL_MAP_REMAPPING_ASM_DONE);
+
+        if (FabricLoader.getInstance().isDevelopmentEnvironment()) {
+            Logger.info(String.format("Remapping: Minecraft %s developing environment detected.", ModInfo.MINECRAFT_MOD.getMetadata().getVersion().getFriendlyString()));
+            Lang.delete(ModInfo.VOXEL_MAP_REMAPPING_DONE);
+            Files.copy(ModInfo.VOXEL_MAP_REMAPPING_ASM_DONE, ModInfo.VOXEL_MAP_REMAPPING_DONE);
+        } else {
+            // Remapping: current yarn -> current intermediary
+            Logger.info(String.format("Remapping: %s %s -> %s %s", ModInfo.MINECRAFT_MOD.getMetadata().getVersion().getFriendlyString(), NamespaceManager.MAPPING_YARN, ModInfo.MINECRAFT_MOD.getMetadata().getVersion().getFriendlyString(), NamespaceManager.MAPPING_INTERMEDIARY));
+            Lang.delete(ModInfo.VOXEL_MAP_REMAPPING_DONE);
+            NamespaceManager.remapJar(NamespaceManager.MAPPING_YARN, NamespaceManager.MAPPING_INTERMEDIARY, ModInfo.VOXEL_MAP_REMAPPING_ASM_DONE, ModInfo.VOXEL_MAP_REMAPPING_DONE);
+        }
+
+        Logger.info("Remapping: Finish");
+
+        if (!isVoxellatestRemapperDeveloping()) {
+            ConfigFileManager.writeTo(ModInfo.VERSION_CONFIG_FILE);
         }
     }
 
@@ -123,54 +159,6 @@ public final class VoxelMapClassRemaManager {
         return !ConfigFileManager.readFrom(configFile).isLatest();
     }
 
-    private static void mapVoxelMapJarFile() throws IOException {
-        if (!shouldUpdateVoxelMapJarFileMapCache()) {
-            Logger.info("Find remapped.jar. Skip Remapping");
-            return;
-        }
-
-        Logger.info("Remapping voxelmap.jar. This may cost a huge amount of time. Please wait patiently");
-
-        if (!Files.isDirectory(ModInfo.MOD_DIR)) {
-            Lang.delete(ModInfo.MOD_DIR);
-            Files.createDirectory(ModInfo.MOD_DIR);
-        }
-
-        // ModInfo.getVoxelMapRawFile() -> ModInfo.getVoxelMapIntermediaryRemappingFile() -> ModInfo.getVoxelMapASMRemappingFile(), ModInfo.getVoxelMapRemappedFile()
-
-        NamespaceManager.init();
-
-        if (!Files.isRegularFile(ModInfo.VOXEL_MAP_RAW_FILE)) {
-            Lang.delete(ModInfo.VOXEL_MAP_RAW_FILE);
-            downloadVoxelMapRawJarFile(ModInfo.VOXEL_MAP_RAW_FILE);
-        }
-
-        // Remapping: 1.17 intermediary -> current yarn
-        Logger.info(String.format("Remapping: %s %s -> %s %s", ModInfo.MINECRAFT_MOD.getMetadata().getVersion().getFriendlyString(), NamespaceManager.MAPPING_INTERMEDIARY, ModInfo.MINECRAFT_MOD.getMetadata().getVersion().getFriendlyString(), NamespaceManager.MAPPING_YARN));
-        Lang.delete(ModInfo.VOXEL_MAP_REMAPPING_YARN_DOWN);
-        NamespaceManager.run(NamespaceManager.MAPPING_INTERMEDIARY, NamespaceManager.MAPPING_YARN, ModInfo.VOXEL_MAP_RAW_FILE, ModInfo.VOXEL_MAP_REMAPPING_YARN_DOWN);
-
-        // Remapping: ASM Remapping
-        Logger.info("Remapping: ASM Remapping");
-        Lang.delete(ModInfo.VOXEL_MAP_REMAPPING_ASM_DONE);
-        remapByASM(ModInfo.VOXEL_MAP_REMAPPING_YARN_DOWN, ModInfo.VOXEL_MAP_REMAPPING_ASM_DONE);
-
-        if (FabricLoader.getInstance().isDevelopmentEnvironment()) {
-            Logger.info(String.format("Remapping: Minecraft %s developing environment detected.", ModInfo.MINECRAFT_MOD.getMetadata().getVersion().getFriendlyString()));
-            Lang.delete(ModInfo.VOXEL_MAP_REMAPPING_DONE);
-            Files.copy(ModInfo.VOXEL_MAP_REMAPPING_ASM_DONE, ModInfo.VOXEL_MAP_REMAPPING_DONE);
-        } else {
-            // Remapping: current yarn -> current intermediary
-            Logger.info(String.format("Remapping: %s %s -> %s %s", ModInfo.MINECRAFT_MOD.getMetadata().getVersion().getFriendlyString(), NamespaceManager.MAPPING_YARN, ModInfo.MINECRAFT_MOD.getMetadata().getVersion().getFriendlyString(), NamespaceManager.MAPPING_INTERMEDIARY));
-            Lang.delete(ModInfo.VOXEL_MAP_REMAPPING_DONE);
-            NamespaceManager.run(NamespaceManager.MAPPING_YARN, NamespaceManager.MAPPING_INTERMEDIARY, ModInfo.VOXEL_MAP_REMAPPING_ASM_DONE, ModInfo.VOXEL_MAP_REMAPPING_DONE);
-        }
-
-        Logger.info("Remapping: Finish");
-
-        createConfigFile();
-    }
-
     private static boolean isVoxellatestRemapperDeveloping() {
         if ("ignoreDeveloping".equals(System.getProperty("voxellatest.cache"))) {
             return false;
@@ -178,12 +166,18 @@ public final class VoxelMapClassRemaManager {
         return Files.isDirectory(ModInfo.VOXEL_REMAPPER_MOD.getOrigin().getPaths().get(0));
     }
 
-    private static void createConfigFile() throws IOException {
-        if (isVoxellatestRemapperDeveloping()) {
-            return;
-        }
+    private static void downloadVoxelMapRawJarFile(Path path) throws IOException {
+        String url = "https://mediafilez.forgecdn.net/files/3345/206/fabricmod_VoxelMap-1.10.15_for_1.17.0.jar";
 
-        ConfigFileManager.writeTo(ModInfo.VERSION_CONFIG_FILE);
+        Logger.info(String.format("Downloading voxelmap from \"%s\"", url));
+
+        URL tinyUrl = new URL(url);
+        HttpURLConnection request = (HttpURLConnection) tinyUrl.openConnection();
+        request.setReadTimeout(10000);
+        request.connect();
+        try (OutputStream outputStream = Files.newOutputStream(path)) {
+            request.getInputStream().transferTo(outputStream);
+        }
     }
 
     private static void remapByASM(Path fromPath, Path toPath) throws IOException {

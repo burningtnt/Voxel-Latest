@@ -1,7 +1,7 @@
 package net.burningtnt.voxellatest.entrypoints;
 
+import net.burningtnt.voxellatest.VoxelMapClassRemapManager;
 import net.burningtnt.voxellatest.util.Logger;
-import net.burningtnt.voxellatest.VoxelMapClassRemaManager;
 import org.objectweb.asm.tree.ClassNode;
 import org.spongepowered.asm.mixin.Mixins;
 import org.spongepowered.asm.mixin.extensibility.IMixinConfigPlugin;
@@ -17,10 +17,10 @@ public class MixinPluginEntrypointImpl implements IMixinConfigPlugin {
     static {
         try {
             Logger.info("Start to remap VoxelMap");
-            VoxelMapClassRemaManager.run();
+            VoxelMapClassRemapManager.run();
             Logger.info("Success to remap VoxelMap");
         } catch (Throwable e) {
-            System.err.println("[Voxel Latest] A fatal error happended while invoking net.burningtnt.voxellatest.VoxelMapClassRemaManager.run .");
+            System.err.println("[Voxel Latest] A fatal error happended while invoking net.burningtnt.voxellatest.VoxelMapClassRemapManager.run .");
             e.printStackTrace(System.err);
             try {
                 System.exit(-1);

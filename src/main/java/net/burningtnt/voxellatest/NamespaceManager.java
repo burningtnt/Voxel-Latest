@@ -82,13 +82,13 @@ public final class NamespaceManager {
             minecraftYarnFile = currentMinecraftFile;
             minecraftIntermediaryFile = ModInfo.MOD_DIR.resolve("minecraft-intermediary.jar");
 
-            run(NamespaceManager.MAPPING_YARN, NamespaceManager.MAPPING_INTERMEDIARY, currentMinecraftFile, minecraftIntermediaryFile, null);
+            remapJar(NamespaceManager.MAPPING_YARN, NamespaceManager.MAPPING_INTERMEDIARY, currentMinecraftFile, minecraftIntermediaryFile, null);
         } else {
             Logger.info("Remapping: Prepare TinyRemapper in normal environment.");
             minecraftYarnFile = ModInfo.MOD_DIR.resolve("minecraft-yarn.jar");
             minecraftIntermediaryFile = currentMinecraftFile;
 
-            run(NamespaceManager.MAPPING_INTERMEDIARY, NamespaceManager.MAPPING_YARN, currentMinecraftFile, minecraftYarnFile, null);
+            remapJar(NamespaceManager.MAPPING_INTERMEDIARY, NamespaceManager.MAPPING_YARN, currentMinecraftFile, minecraftYarnFile, null);
         }
     }
 
@@ -177,11 +177,11 @@ public final class NamespaceManager {
         return desc;
     }
 
-    public static void run(String fromName, String toName, Path fromPath, Path toPath) {
-        run(fromName, toName, fromPath, toPath, fromName.equals(MAPPING_YARN) ? getMinecraftYarnFile() : getMinecraftIntermediaryFile());
+    public static void remapJar(String fromName, String toName, Path fromPath, Path toPath) {
+        remapJar(fromName, toName, fromPath, toPath, fromName.equals(MAPPING_YARN) ? getMinecraftYarnFile() : getMinecraftIntermediaryFile());
     }
 
-    public static void run(String fromName, String toName, Path fromPath, Path toPath, Path sourceFile) {
+    public static void remapJar(String fromName, String toName, Path fromPath, Path toPath, Path sourceFile) {
         Logger.info(String.format(
                 "Remap file from namespace \"%s\" to namespace \"%s\" with tiny-remapper from path \"%s\" to path \"%s\" with Tiny Remapper",
                 fromName, toName, fromPath, toPath
