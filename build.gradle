@@ -93,18 +93,22 @@ build {
 
     doLast {
         for (Project subProject : subprojects) {
-            File sourceFile = new File(subProject.buildDir, "libs/${subProject.archives_base_name}-${subProject.mod_version}.jar")
-            File targetFile = new File(project.rootDir, "release/${project.archives_base_name}-${subProject.mod_version}-${subProject.minecraft_version}.jar")
+            for (String suffix : new String[]{"", "-sources"}) {
+                File sourceFile = new File(subProject.buildDir, "libs/${subProject.archives_base_name}-${subProject.mod_version}${suffix}.jar")
+                File targetFile = new File(project.buildDir, "libs/${project.archives_base_name}-${subProject.mod_version}-${subProject.minecraft_version}${suffix}.jar")
 
-            if (sourceFile.exists()) {
-                if (!targetFile.delete()) {
-                    throw new SecurityException("Failed to delete file ${targetFile.getAbsolutePath()}.")
-                }
-                try (
-                        FileInputStream fileInputStream = new FileInputStream(sourceFile)
-                        FileOutputStream fileOutputStream = new FileOutputStream(targetFile)
-                ) {
-                    fileInputStream.transferTo(fileOutputStream)
+                if (sourceFile.exists()) {
+                    if (targetFile.exists()) {
+                        if (!targetFile.delete()) {
+                            throw new SecurityException("Failed to delete file ${targetFile.getAbsolutePath()}.")
+                        }
+                    }
+                    try (
+                            FileInputStream fileInputStream = new FileInputStream(sourceFile)
+                            FileOutputStream fileOutputStream = new FileOutputStream(targetFile)
+                    ) {
+                        fileInputStream.transferTo(fileOutputStream)
+                    }
                 }
             }
         }
