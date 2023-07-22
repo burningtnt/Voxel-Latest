@@ -2,11 +2,11 @@ package net.burningtnt.voxellatest.asm;
 
 import net.burningtnt.voxellatest.NamespaceManager;
 import net.fabricmc.loader.api.FabricLoader;
+import org.jetbrains.annotations.Nullable;
 import org.objectweb.asm.ClassReader;
 import org.objectweb.asm.tree.*;
 import org.spongepowered.asm.mixin.injection.struct.TargetNotSupportedException;
 
-import javax.annotation.Nullable;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.List;

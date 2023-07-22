@@ -86,14 +86,10 @@ afterEvaluate {
 }
 
 build {
-    dependsOn "checkstyleMain"
-}
-
-task buildAll {
     for (Project subProject : subprojects) {
         dependsOn ":${subProject.name}:build"
     }
-    dependsOn "build"
+    dependsOn "checkstyleMain"
 
     doLast {
         for (Project subProject : subprojects) {
